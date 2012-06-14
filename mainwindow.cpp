@@ -6,6 +6,8 @@
 #include "qfile.h"
 #include "QDataStream"
 #include <QApplication>
+#include "QFileDialog"
+#include "QDataStream"
 #include "QTimer"
 #include "QList"
 
@@ -110,7 +112,49 @@ void MainWindow::on_openButton_clicked()
     runThread();
 }
 
+void MainWindow::on_readButton_clicked()
+{
+    changeTestinfo();
+    test->testFunc = T_OPEN;
+    test->openMode = O_WRITE;
+
+    createThread();
+    runThread();
+}
+
 void MainWindow::on_pushButton_clicked()
 {
-
+    long long allrst;
+    QString fileName = QFileDialog::getOpenFileName(
+                this,
+                QDir::currentPath());
+    sky_sdfs_init("config.ini");
+    long long tmpfid = sky_sdfs_createfile(fileName.toAscii().constData(),256*1024*1024,1);
+    int tmpfd = sky_sdfs_openfile(tmpfid,O_WRITE);
+    qDebug()<<"tmpfid="<<tmpfid<<" tmpfd="<<tmpfd;
+    if (!fileName.isNull()) {
+        QFile file(fileName);
+        if(file.open(QIODevice::ReadOnly)){
+            char buff[2*1024*1024];
+            while(!file.atEnd()){
+                file.read(buff,sizeof(buff));
+                qDebug()<<"write start";
+                int result = sky_sdfs_write(tmpfd,buff,sizeof(buff));
+                 qDebug()<<result;
+                if(result == -1){
+                    char name[100];
+                    qDebug()<<getlasterror(tmpfd,name,100);
+                }
+                else{
+                    allrst +=result;
+                }
+                qDebug()<<allrst<<"/"<<file.size();
+            }
+            sky_sdfs_close(tmpfd);
+            file.close();
+        }
+    }
 }
+
+
+
