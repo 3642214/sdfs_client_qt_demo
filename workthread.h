@@ -7,6 +7,7 @@
 #define T_READ			4
 
 #include <QThread>
+#include <QFile>
 
 typedef struct testinfo{
     int        testFunc;
@@ -47,6 +48,7 @@ private:
     testinfo* testinfo1;
     int errorTotal;
     int tureTotal;
+    bool checkFile(QFile file1,QFile file2);
 
 public:
     QString name;

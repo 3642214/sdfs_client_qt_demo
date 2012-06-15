@@ -27,3 +27,6 @@ else:unix: LIBS += ./libclient.so
 
 INCLUDEPATH += $$PWD/../
 DEPENDPATH += $$PWD/../
+
+OTHER_FILES += \
+    testReadFile

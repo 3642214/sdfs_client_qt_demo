@@ -66,16 +66,15 @@ void MainWindow::threadOver(QString name)
 
 void MainWindow::isThreadFinished()
 {
-    int j=0;
     for(int i=0;i<atoi(ui->lineEdit->text().toAscii());i++)
     {
         if(threadList->at(i)->isFinished())
         {
             threadOver(threadList->at(i)->name);
-            j++;
+            threadList->removeAt(i);
         }
     }
-    if(j==threadList->length())
+    if(threadList->isEmpty())
     {
         timer->stop();
         qDebug()<<"All Threads are finished";
@@ -115,7 +114,7 @@ void MainWindow::on_openButton_clicked()
 void MainWindow::on_readButton_clicked()
 {
     changeTestinfo();
-    test->testFunc = T_OPEN;
+    test->testFunc = T_READ;
     test->openMode = O_WRITE;
 
     createThread();
@@ -124,7 +123,7 @@ void MainWindow::on_readButton_clicked()
 
 void MainWindow::on_pushButton_clicked()
 {
-    long long allrst;
+    long long allrst = 0;
     QString fileName = QFileDialog::getOpenFileName(
                 this,
                 QDir::currentPath());
@@ -137,13 +136,13 @@ void MainWindow::on_pushButton_clicked()
         if(file.open(QIODevice::ReadOnly)){
             char buff[2*1024*1024];
             while(!file.atEnd()){
-                file.read(buff,sizeof(buff));
+                int size = file.read(buff,sizeof(buff));
                 qDebug()<<"write start";
-                int result = sky_sdfs_write(tmpfd,buff,sizeof(buff));
-                 qDebug()<<result;
+                int result = sky_sdfs_write(tmpfd,buff,size);
+//                 qDebug()<<result;
                 if(result == -1){
                     char name[100];
-                    qDebug()<<getlasterror(tmpfd,name,100);
+                    qDebug()<<"ERROR:"<<getlasterror(tmpfd,name,100);
                 }
                 else{
                     allrst +=result;

@@ -1,6 +1,7 @@
 #include "workthread.h"
 #include "SkySDFSSDK.h"
 #include "QDebug"
+#include "QFile"
 
 workThread::workThread(QObject *parent) :
     QThread(parent)
@@ -85,14 +86,55 @@ void workThread::testWrite()
 
 void workThread::testRead()
 {
-    this->testOpen(O_READ);
+    this->testOpen(O_WRITE);
+    QFile file("testReadFile");
+    if(file.open(QIODevice::ReadOnly)){
+        char buff[2*1024*1024];
+        while(!file.atEnd()){
+            int size = file.read(buff,sizeof(buff));
+            qDebug()<<"write start";
+            int result = sky_sdfs_write(fd,buff,size);
+            if(result == -1){
+                char name[100];
+                qDebug()<<"ERROR:"<<getlasterror(fd,name,100);
+            }
+            else{
+                qDebug()<<result;
+            }
+        }
+    }
+    file.close();
+   close();
+   int fd = sky_sdfs_openfile(fileID,O_READ);
+   qDebug()<<fd;
+   QFile testFile("testFile" + name);
+   if(testFile.open(QIODevice::WriteOnly)){
+       char buff[2*1024*1024];
+       while(TRUE){
+           int result = sky_sdfs_read(fd,buff,sizeof(buff));
+           if (result !=0){
+               testFile.write(buff,result);
+           }
+           else{
+               break;
+           }
+       }
+       testFile.close();
+   }
+   if(checkFile(file,testfile)){
 
+   }
 }
 
 void workThread::close()
 {
     sky_sdfs_close(fd);
-    qDebug()<<fd<<" closed";
+    qDebug()<<"fd= "<<fd<<" closed";
+}
+
+bool workThread::checkFile(QFile file1, QFile file2)
+{
+
 }
 
 void workThread::init()
