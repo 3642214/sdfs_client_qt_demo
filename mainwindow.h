@@ -22,7 +22,7 @@ private slots:
 
     void on_openButton_clicked();
 
-    void on_pushButton_clicked();
+    void on_upLocalFile_clicked();
 
     void on_readButton_clicked();
 
@@ -35,8 +35,14 @@ private:
     void runThread();
     void threadOver(QString name);
     QTimer *timer;
-
-
+    int lineCount;
+private slots:
+    void threadOver();
+    void on_test_87_1_clicked();
+    void on_test_87_2_clicked();
+    void on_test_87_3_clicked();
+    void on_test_90_1_clicked();
+    void on_test_90_2_clicked();
 };
 
 #endif // MAINWINDOW_H

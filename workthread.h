@@ -18,6 +18,7 @@ typedef struct testinfo{
     long      buffsize;
     long      filesize;
     int        openMode;
+    QString      result;
     }testinfo;
 
 class workThread : public QThread
@@ -49,6 +50,8 @@ private:
     int errorTotal;
     int tureTotal;
     bool checkFile(QFile file1,QFile file2);
+    qint64 allDownloadFileSize;
+    qint64 allUploadFileSize ;
 
 public:
     QString name;

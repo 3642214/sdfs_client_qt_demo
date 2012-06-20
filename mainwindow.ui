@@ -50,7 +50,7 @@
      </rect>
     </property>
     <property name="text">
-     <string>3</string>
+     <string>1</string>
     </property>
    </widget>
    <widget class="QLineEdit" name="lineEdit_5">
@@ -63,7 +63,7 @@
      </rect>
     </property>
     <property name="text">
-     <string>100</string>
+     <string>1000</string>
     </property>
    </widget>
    <widget class="QPushButton" name="CreatButton">
@@ -209,17 +209,17 @@
      <string>testOpen</string>
     </property>
    </widget>
-   <widget class="QPushButton" name="pushButton">
+   <widget class="QPushButton" name="upLocalFile">
     <property name="geometry">
      <rect>
       <x>420</x>
-      <y>220</y>
+      <y>110</y>
       <width>92</width>
       <height>27</height>
      </rect>
     </property>
     <property name="text">
-     <string>PushButton</string>
+     <string>上传本地文件</string>
     </property>
    </widget>
    <widget class="QPushButton" name="readButton">
@@ -233,6 +233,81 @@
     </property>
     <property name="text">
      <string>testRead</string>
+    </property>
+   </widget>
+   <widget class="QPushButton" name="test_87_1">
+    <property name="geometry">
+     <rect>
+      <x>420</x>
+      <y>140</y>
+      <width>92</width>
+      <height>27</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>sky-87:1</string>
+    </property>
+   </widget>
+   <widget class="QTextEdit" name="textEdit">
+    <property name="geometry">
+     <rect>
+      <x>20</x>
+      <y>150</y>
+      <width>381</width>
+      <height>241</height>
+     </rect>
+    </property>
+   </widget>
+   <widget class="QPushButton" name="test_87_2">
+    <property name="geometry">
+     <rect>
+      <x>420</x>
+      <y>170</y>
+      <width>92</width>
+      <height>27</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>sky-87:2</string>
+    </property>
+   </widget>
+   <widget class="QPushButton" name="test_87_3">
+    <property name="geometry">
+     <rect>
+      <x>420</x>
+      <y>200</y>
+      <width>92</width>
+      <height>27</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>sky-87:3</string>
+    </property>
+   </widget>
+   <widget class="QPushButton" name="test_90_1">
+    <property name="geometry">
+     <rect>
+      <x>420</x>
+      <y>230</y>
+      <width>92</width>
+      <height>27</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>sky-90:1</string>
+    </property>
+   </widget>
+   <widget class="QPushButton" name="test_90_2">
+    <property name="geometry">
+     <rect>
+      <x>420</x>
+      <y>260</y>
+      <width>92</width>
+      <height>27</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>sky-90:2</string>
     </property>
    </widget>
   </widget>

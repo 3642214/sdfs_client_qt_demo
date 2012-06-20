@@ -15,11 +15,12 @@ MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
     ui(new Ui::MainWindow)
 {
+    lineCount = 1;
     timer = new QTimer(this);
     connect(timer,SIGNAL(timeout()),this,SLOT(isThreadFinished()));
-   test = new testinfo;
-   threadList = new QList<workThread*>;
-   ui->setupUi(this);
+    test = new testinfo;
+    threadList = new QList<workThread*>;
+    ui->setupUi(this);
 }
 
 MainWindow::~MainWindow()
@@ -30,6 +31,7 @@ MainWindow::~MainWindow()
 
 void MainWindow::changeTestinfo()
 {
+    test->result = "false";
     test->blocklength = atoi(ui->lineEdit_2->text().toAscii());
     test->copysize = atoi(ui->lineEdit_3->text().toAscii());
     test->buffsize = atoi(ui->lineEdit_4->text().toAscii());
@@ -43,7 +45,8 @@ void MainWindow::createThread()
     {
         workThread *thread = new workThread(QString::number(i),test);
         threadList->push_back(thread);
-//        qDebug()<<i;
+        connect(thread,SIGNAL(finished()),this,SLOT(threadOver()));
+        //        qDebug()<<i;
     }
 }
 
@@ -61,23 +64,38 @@ void MainWindow::runThread()
 
 void MainWindow::threadOver(QString name)
 {
-    qDebug()<<"thread"<<name<<"is stop";
+    //    ui->textEdit->append(QString::number(lineCount) + " -----> thread       " + name + "      " +test->result);
+    //    lineCount++;
+    //    qDebug()<<"thread"<<name<<"is stop";
+
+}
+
+void MainWindow::threadOver()
+{
+    ui->textEdit->append(QString::number(lineCount) + " -----> thread       " +  "      " +test->result);
+    lineCount++;
+    //    qDebug()<<"thread"<<name<<"is stop";
 }
 
 void MainWindow::isThreadFinished()
-{
-    for(int i=0;i<atoi(ui->lineEdit->text().toAscii());i++)
-    {
-        if(threadList->at(i)->isFinished())
-        {
-            threadOver(threadList->at(i)->name);
-            threadList->removeAt(i);
-        }
-    }
+{ 
     if(threadList->isEmpty())
     {
         timer->stop();
+        ui->textEdit->append("test over!");
         qDebug()<<"All Threads are finished";
+        lineCount = 1;
+    }
+    else{
+        for(int i=0;i<threadList->length();i++)
+        {
+            if(threadList->at(i)->isFinished())
+            {
+                threadOver(threadList->at(i)->name);
+                threadList->removeAt(i);
+                //                qDebug()<<"xiancehgns"<<threadList->length();
+            }
+        }
     }
 }
 
@@ -94,7 +112,7 @@ void MainWindow::on_writeButton_clicked()
     changeTestinfo();
     test->testFunc = T_WRITE;
     createThread();
-//    threadList->at(12)->start();
+    //    threadList->at(12)->start();
     runThread();
 }
 
@@ -121,7 +139,7 @@ void MainWindow::on_readButton_clicked()
     runThread();
 }
 
-void MainWindow::on_pushButton_clicked()
+void MainWindow::on_upLocalFile_clicked()
 {
     long long allrst = 0;
     QString fileName = QFileDialog::getOpenFileName(
@@ -139,7 +157,7 @@ void MainWindow::on_pushButton_clicked()
                 int size = file.read(buff,sizeof(buff));
                 qDebug()<<"write start";
                 int result = sky_sdfs_write(tmpfd,buff,size);
-//                 qDebug()<<result;
+                //                 qDebug()<<result;
                 if(result == -1){
                     char name[100];
                     qDebug()<<"ERROR:"<<getlasterror(tmpfd,name,100);
@@ -156,4 +174,118 @@ void MainWindow::on_pushButton_clicked()
 }
 
 
+void MainWindow::on_test_87_1_clicked()
+{
+    sky_sdfs_init("config.ini");
+    long long testfid = sky_sdfs_createfile("testfilename",256*1024*1024,1);
+    int testfd = sky_sdfs_openfile(testfid + 123,O_READ);
+    if(testfd == -1 and testfid != -1){
+        ui->textEdit->append(QString::number(lineCount) + " -----> use wrong fileid to open file           test    OK");
+        lineCount++;
+    }
+    else{
+        ui->textEdit->append(QString::number(lineCount) + " -----> use wrong fileid to open file           test    FAIL");
+        lineCount++;
+    }
+    sky_sdfs_cleanup();
+}
 
+void MainWindow::on_test_87_2_clicked()
+{
+    sky_sdfs_init("config.ini");
+    long long testfid = sky_sdfs_createfile("testfilename",256*1024*1024,1);
+    int testfd = sky_sdfs_openfile(testfid,O_WRITE);
+    char buff[2*1024*1024];
+    int result = sky_sdfs_read(testfd,buff,sizeof(buff));
+    qDebug()<<result;
+    if(result == -1 and testfd != -1){
+        char name1[100];
+        int errcode = getlasterror(testfd,name1,100);
+        qDebug()<<"ERROR:"<<errcode<<name1;
+        if(errcode == 2011){
+            ui->textEdit->append(QString::number(lineCount) + " -----> use write mode to read file           test    OK");
+            lineCount++;
+        }
+    }
+    else{
+        ui->textEdit->append(QString::number(lineCount) + " -----> use write mode to read file           test    FAIL");
+        lineCount++;
+    }
+    sky_sdfs_cleanup();
+}
+
+
+void MainWindow::on_test_87_3_clicked()
+{
+    sky_sdfs_init("config.ini");
+    long long testfid = sky_sdfs_createfile("testfilename",256*1024*1024,1);
+    int testfd = sky_sdfs_openfile(testfid,O_READ);
+    char buff[2*1024*1024];
+    int result = sky_sdfs_write(testfd,buff,sizeof(buff));
+    qDebug()<<result;
+    if(result == -1 and testfd != -1){
+        char name1[100];
+        int errcode = getlasterror(testfd,name1,100);
+        qDebug()<<"ERROR:"<<errcode<<name1;
+        if(errcode == 2011){
+            ui->textEdit->append(QString::number(lineCount) + " -----> use read mode to write file           test    OK");
+            lineCount++;
+        }
+    }
+    else{
+        ui->textEdit->append(QString::number(lineCount) + " -----> use read mode to write file           test    FAIL");
+        lineCount++;
+    }
+    sky_sdfs_cleanup();
+}
+
+
+void MainWindow::on_test_90_1_clicked()
+{
+    sky_sdfs_init("config.ini");
+    long long testfid = sky_sdfs_createfile("testfilename",256*1024*1024,1);
+    int testfd = sky_sdfs_openfile(testfid,O_WRITE);
+    sky_sdfs_close(testfd);
+    char buff[2*1024*1024];
+    int result = sky_sdfs_write(testfd,buff,sizeof(buff));
+    qDebug()<<result;
+    if(result == -1 and testfd != -1){
+        char name1[100];
+        int errcode = getlasterror(testfd,name1,100);
+        qDebug()<<"ERROR:"<<errcode<<name1;
+        if(errcode == 102){
+            ui->textEdit->append(QString::number(lineCount) + " -----> write to the closed file           test    OK");
+            lineCount++;
+        }
+    }
+    else{
+        ui->textEdit->append(QString::number(lineCount) + " -----> write to the closed file           test    FAIL");
+        lineCount++;
+    }
+    sky_sdfs_cleanup();
+}
+
+void MainWindow::on_test_90_2_clicked()
+{
+    sky_sdfs_init("config.ini");
+    long long testfid = sky_sdfs_createfile("testfilename",256*1024*1024,1);
+    int testfd = sky_sdfs_openfile(testfid,O_READ);
+    sky_sdfs_close(testfd);
+    char buff[2*1024*1024];
+    int result = sky_sdfs_read(testfd,buff,sizeof(buff));
+    qDebug()<<result;
+    if(result == -1 and testfd != -1){
+        char name1[100];
+        int errcode = getlasterror(testfd,name1,100);
+        qDebug()<<"ERROR:"<<errcode<<name1;
+        if(errcode == 102){
+            ui->textEdit->append(QString::number(lineCount) + " -----> read to the closed file           test    OK");
+            lineCount++;
+        }
+        else{
+            ui->textEdit->append(QString::number(lineCount) + " -----> read to the closed file           test    FAIL");
+            lineCount++;
+        }
+    }
+    sky_sdfs_cleanup();
+}
