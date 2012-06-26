@@ -56,7 +56,7 @@ void workThread::testCreate()
     }
     else{
         testinfo1->result = name + "testCreate   false";
-        this->quit();
+        return;
         qDebug()<<"Thread"<<name<<":"<<"Create ------------------------->fail";
     }
 
@@ -74,7 +74,7 @@ void workThread::testOpen(int mode)
     else{
         testinfo1->result = name + "    testOpen   false";
         qDebug()<<"Thread"<<name<<":"<<"Open ------------------------->fail";
-        this->quit();
+        return;
     }
 
 
@@ -101,7 +101,7 @@ void workThread::testWrite()
                 testinfo1->result = name + "    testWrite   false";
                 qDebug()<<"Thread "<<name<<"upload fail";
                 qDebug()<<"Thread"<<name<<":"<<"Write ------------------------->fail";
-                this->quit();
+                return;
             }
         } 
     }
@@ -128,7 +128,7 @@ void workThread::testRead()
                 result = sky_sdfs_write(fd,buff,size);
                 if(result == -1){
                     qDebug()<<"Thread "<<name<<"upload fail";
-                    this->quit();
+                    return;
                 }
                 else
                     allUploadFileSize += result;

@@ -257,6 +257,9 @@
       <height>241</height>
      </rect>
     </property>
+    <property name="verticalScrollBarPolicy">
+     <enum>Qt::ScrollBarAlwaysOn</enum>
+    </property>
    </widget>
    <widget class="QPushButton" name="test_87_2">
     <property name="geometry">

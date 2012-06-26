@@ -21,6 +21,7 @@ MainWindow::MainWindow(QWidget *parent) :
     test = new testinfo;
     threadList = new QList<workThread*>;
     ui->setupUi(this);
+    ui->textEdit->ensureCursorVisible();
 }
 
 MainWindow::~MainWindow()
@@ -58,7 +59,7 @@ void MainWindow::runThread()
         threadList->at(i)->start();
         qDebug()<<"thread "<<i<<" is start";
     }
-    timer->start(1000);
+    timer->start(100);
 
 }
 
@@ -193,11 +194,12 @@ void MainWindow::on_test_87_1_clicked()
 void MainWindow::on_test_87_2_clicked()
 {
     sky_sdfs_init("config.ini");
-    long long testfid = sky_sdfs_createfile("testfilename",256*1024*1024,1);
+    long long testfid = sky_sdfs_createfile(QString::number(lineCount).toAscii().constData(),256*1024*1024,1);
+//    sleep(1000);
     int testfd = sky_sdfs_openfile(testfid,O_WRITE);
     char buff[2*1024*1024];
     int result = sky_sdfs_read(testfd,buff,sizeof(buff));
-    qDebug()<<result;
+    qDebug()<<result<<testfd;
     if(result == -1 and testfd != -1){
         char name1[100];
         int errcode = getlasterror(testfd,name1,100);
