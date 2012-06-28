@@ -9,6 +9,8 @@ QT       += core gui
 TARGET = skySDFS
 TEMPLATE = app
 
+win32:LIBS += -L$$PWD\ -lskyFS-client-c
+else:unix: LIBS += -L$$PWD/ -lclient
 
 SOURCES += main.cpp\
         mainwindow.cpp \
@@ -19,14 +21,6 @@ HEADERS  += mainwindow.h \
     workthread.h
 
 FORMS    += mainwindow.ui
-
-
-win32:CONFIG(release, debug|release): LIBS += -L$$PWD/ -lskyFS-client-c
-else:win32:CONFIG(debug, debug|release): LIBS += -L$$PWD/ -lskyFS-client-cD
-else:unix: LIBS += ./libclient.so
-
-INCLUDEPATH += $$PWD/../
-DEPENDPATH += $$PWD/../
 
 OTHER_FILES += \
     testReadFile
