@@ -94,7 +94,7 @@ void workThread::testWrite()
         if(result == -1)
         {
             char errname[100];
-            qDebug()<<getlasterror(fd,errname,100);
+            qDebug()<<getlasterror(fd,errname,100)<<errname;
             qDebug()<<"upload retry";
             result = sky_sdfs_write(fd,buffer,(testinfo1->buffsize*1024*1024)*sizeof(char));
             if(result == -1){

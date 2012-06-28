@@ -21,8 +21,8 @@ HEADERS  += mainwindow.h \
 FORMS    += mainwindow.ui
 
 
-win32:CONFIG(release, debug|release): LIBS += -L$$PWD/../release/ -lclient
-else:win32:CONFIG(debug, debug|release): LIBS += -L$$PWD/../debug/ -lclient
+win32:CONFIG(release, debug|release): LIBS += -L$$PWD/ -lskyFS-client-c
+else:win32:CONFIG(debug, debug|release): LIBS += -L$$PWD/ -lskyFS-client-cD
 else:unix: LIBS += ./libclient.so
 
 INCLUDEPATH += $$PWD/../
