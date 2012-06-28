@@ -116,10 +116,10 @@ void workThread::testRead()
     QFile file("testReadFile");
     allUploadFileSize = 0;
     if(file.open(QIODevice::ReadOnly)){
-        char buff[2*1024*1024];
+        char buff[200*1024];
         while(!file.atEnd()){
             int size = file.read(buff,sizeof(buff));
-                       qDebug()<<"write start"<<size;
+//                       qDebug()<<"write start"<<size;
             int result = sky_sdfs_write(fd,buff,size);
             if(result == -1){
                 char errname[100];
@@ -146,14 +146,14 @@ void workThread::testRead()
     allDownloadFileSize = 0;
     QFile testFile("testFile" + name);
     if(testFile.open(QIODevice::WriteOnly)){
-        char buff[2*1024*1024];
+        char buff[200*1024];
         while(TRUE){
             int result = 0;
             result = sky_sdfs_read(fd,buff,sizeof(buff));
-                      qDebug()<<"Thread "<<name<<"read= "<<result;
+//                      qDebug()<<"Thread "<<name<<"read= "<<result;
             if (result > 0){
                 qint64 writelength = testFile.write(buff,result);
-                                qDebug()<<"Thread "<<name<<writelength<<testFile.size()/1024/1024;
+//                                qDebug()<<"Thread "<<name<<writelength<<testFile.size()/1024/1024;
                 allDownloadFileSize += writelength;
             }
             else{
@@ -196,5 +196,5 @@ bool workThread::checkFile(QFile file1, QFile file2)
 
 void workThread::init()
 {
-    sky_sdfs_init("config.ini");
+//    sky_sdfs_init("config.ini");
 }

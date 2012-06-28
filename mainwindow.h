@@ -19,11 +19,8 @@ private slots:
     void isThreadFinished();
     void on_CreatButton_clicked();
     void on_writeButton_clicked();
-
     void on_openButton_clicked();
-
     void on_upLocalFile_clicked();
-
     void on_readButton_clicked();
 
 private:
@@ -36,6 +33,8 @@ private:
     void threadOver(QString name);
     QTimer *timer;
     int lineCount;
+    void btnOn();
+    void btnOff();
 private slots:
     void threadOver();
     void on_test_87_1_clicked();

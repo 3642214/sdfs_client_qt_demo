@@ -26,6 +26,12 @@
 #define SDFS_SEEK_CUR 1
 #define SDFS_SEEK_END 2
 
+#define NORMAL_FILE		0
+#define INDEX_FILE		1
+
+#define STARTTIME		0
+#define ENDTIME			1
+
 #ifdef   __cplusplus 
 extern "C" {
 #endif
@@ -53,6 +59,8 @@ SKY_SDFS_API(int) sky_sdfs_write( int fd,const void* buf,int nbytes);
 SKY_SDFS_API(int) sky_sdfs_read( int fd , const void* buf , int nbytes);
 SKY_SDFS_API(int) getlasterror( int fd , void* errorinfo,int len);
 SKY_SDFS_API(long long) sky_sdfs_lseek( int fd, long long offset, int whence);
+
+SKY_SDFS_API(long long) sky_sdfs_search(int fd , char* time , int mark);
 
 SKY_SDFS_API(int) sky_sdfs_fileinfo( int fd , fileinfo* info);
 

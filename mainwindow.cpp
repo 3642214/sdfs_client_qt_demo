@@ -22,16 +22,19 @@ MainWindow::MainWindow(QWidget *parent) :
     threadList = new QList<workThread*>;
     ui->setupUi(this);
     ui->textEdit->ensureCursorVisible();
+    sky_sdfs_init("config.ini");
 }
 
 MainWindow::~MainWindow()
 {
+    sky_sdfs_cleanup();
     delete ui;
 }
 
 
 void MainWindow::changeTestinfo()
 {
+    btnOff();
     test->result = "false";
     test->blocklength = atoi(ui->lineEdit_2->text().toAscii());
     test->copysize = atoi(ui->lineEdit_3->text().toAscii());
@@ -71,6 +74,18 @@ void MainWindow::threadOver(QString name)
 
 }
 
+void MainWindow::btnOn()
+{
+    ui->widget->setEnabled(true);
+    ui->widget_2->setEnabled(true);
+}
+
+void MainWindow::btnOff()
+{
+    ui->widget->setEnabled(false);
+    ui->widget_2->setEnabled(false);
+}
+
 void MainWindow::threadOver()
 {
     ui->textEdit->append(QString::number(lineCount) + " -----> thread       " +  "      " +test->result);
@@ -85,6 +100,7 @@ void MainWindow::isThreadFinished()
         timer->stop();
         ui->textEdit->append("test over!");
         qDebug()<<"All Threads are finished";
+        btnOn();
         lineCount = 1;
     }
     else{
@@ -153,7 +169,7 @@ void MainWindow::on_upLocalFile_clicked()
     if (!fileName.isNull()) {
         QFile file(fileName);
         if(file.open(QIODevice::ReadOnly)){
-            char buff[2*1024*1024];
+            char buff[200*1024];
             while(!file.atEnd()){
                 int size = file.read(buff,sizeof(buff));
                 qDebug()<<"write start";
