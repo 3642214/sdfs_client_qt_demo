@@ -52,7 +52,9 @@ typedef struct fileinfo{
 SKY_SDFS_API(int) sky_sdfs_init(char* path);
 SKY_SDFS_API(int) sky_sdfs_cleanup(void);
 
-SKY_SDFS_API(long long)  sky_sdfs_createfile(const char* filename , int blocklength , int copysize);
+SKY_SDFS_API(long long) sky_sdfs_createfile(const char* filename , int blocklength , int copysize);
+SKY_SDFS_API(long long) sky_sdfs_createfile_ex(const char* filename , int blocklength , int copysize , int filetype , char* StartTime , long long lfileid);
+
 SKY_SDFS_API(int) sky_sdfs_openfile(long long fileid , int mode);
 SKY_SDFS_API(void) sky_sdfs_close( int fd);
 SKY_SDFS_API(int) sky_sdfs_write( int fd,const void* buf,int nbytes);
@@ -62,7 +64,7 @@ SKY_SDFS_API(long long) sky_sdfs_lseek( int fd, long long offset, int whence);
 
 SKY_SDFS_API(long long) sky_sdfs_search(int fd , char* time , int mark);
 
-SKY_SDFS_API(int) sky_sdfs_fileinfo( int fd , fileinfo* info);
+SKY_SDFS_API(int) sky_sdfs_fileinfo( long long fileid , fileinfo* info);
 
 #ifdef   __cplusplus 
 }

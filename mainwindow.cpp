@@ -11,6 +11,10 @@
 #include "QTimer"
 #include "QList"
 
+
+#define BUFFSIZE		1024*1024
+#define BLOCKLENGTH     256*1024*1024
+
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
     ui(new Ui::MainWindow)
@@ -86,6 +90,37 @@ void MainWindow::btnOff()
     ui->widget_2->setEnabled(false);
 }
 
+bool MainWindow::uploadFile(long long fileFid,QString fileName)
+{
+    long long allrst = 0;
+    int fileFd = sky_sdfs_openfile(fileFid,O_WRITE);
+    qDebug()<<"fileName= "<<fileName<<" fileFid="<<fileFid<<" fileFd="<<fileFd;
+    QFile file(fileName);
+    if(file.open(QIODevice::ReadOnly) and fileFid > 0 and fileFd > 0){
+        char buff[BUFFSIZE];
+        while(!file.atEnd()){
+            int size = file.read(buff,sizeof(buff));
+//            qDebug()<<"write start";
+            int result = sky_sdfs_write(fileFd,buff,size);
+            //                 qDebug()<<result;
+            if(result == -1){
+                char name[100];
+                qDebug()<<"ERROR:"<<getlasterror(fileFd,name,100)<<name;
+                return false;
+            }
+            else{
+                allrst +=result;
+            }
+            qDebug()<<allrst<<"/"<<file.size();
+        }
+        return true;
+    }
+
+    file.close();
+    sky_sdfs_close(fileFd);
+}
+
+
 void MainWindow::threadOver()
 {
     ui->textEdit->append(QString::number(lineCount) + " -----> thread       " +  "      " +test->result);
@@ -158,34 +193,25 @@ void MainWindow::on_readButton_clicked()
 
 void MainWindow::on_upLocalFile_clicked()
 {
-    long long allrst = 0;
+
     QString fileName = QFileDialog::getOpenFileName(
                 this,
                 QDir::currentPath());
-    sky_sdfs_init("config.ini");
-    long long tmpfid = sky_sdfs_createfile(fileName.toAscii().constData(),256*1024*1024,1);
-    int tmpfd = sky_sdfs_openfile(tmpfid,O_WRITE);
-    qDebug()<<"tmpfid="<<tmpfid<<" tmpfd="<<tmpfd;
     if (!fileName.isNull()) {
-        QFile file(fileName);
-        if(file.open(QIODevice::ReadOnly)){
-            char buff[200*1024];
-            while(!file.atEnd()){
-                int size = file.read(buff,sizeof(buff));
-                qDebug()<<"write start";
-                int result = sky_sdfs_write(tmpfd,buff,size);
-                //                 qDebug()<<result;
-                if(result == -1){
-                    char name[100];
-                    qDebug()<<"ERROR:"<<getlasterror(tmpfd,name,100);
-                }
-                else{
-                    allrst +=result;
-                }
-                qDebug()<<allrst<<"/"<<file.size();
-            }
-            sky_sdfs_close(tmpfd);
-            file.close();
+        int copies = atoi(ui->lineEdit_3->text().toAscii());
+        long long fileFid = sky_sdfs_createfile(fileName.toAscii().constData(),BLOCKLENGTH,copies);
+        if(uploadFile(fileFid,fileName)){
+            ui->textEdit->append(
+                        "fileName= "
+                        +  fileName
+                        +" fileFid= "
+                        +  QString::number(fileFid)
+                        + "  upload OK");
+            lineCount++;
+        }
+        else{
+            ui->textEdit->append("upload fail");
+            lineCount++;
         }
     }
 }
@@ -193,8 +219,7 @@ void MainWindow::on_upLocalFile_clicked()
 
 void MainWindow::on_test_87_1_clicked()
 {
-    sky_sdfs_init("config.ini");
-    long long testfid = sky_sdfs_createfile("testfilename",256*1024*1024,1);
+    long long testfid = sky_sdfs_createfile("testfilename",BLOCKLENGTH,1);
     int testfd = sky_sdfs_openfile(testfid + 123,O_READ);
     if(testfd == -1 and testfid != -1){
         ui->textEdit->append(QString::number(lineCount) + " -----> use wrong fileid to open file           test    OK");
@@ -204,16 +229,14 @@ void MainWindow::on_test_87_1_clicked()
         ui->textEdit->append(QString::number(lineCount) + " -----> use wrong fileid to open file           test    FAIL");
         lineCount++;
     }
-    sky_sdfs_cleanup();
+    //    sky_sdfs_cleanup();
 }
 
 void MainWindow::on_test_87_2_clicked()
 {
-    sky_sdfs_init("config.ini");
-    long long testfid = sky_sdfs_createfile(QString::number(lineCount).toAscii().constData(),256*1024*1024,1);
-//    sleep(1000);
+    long long testfid = sky_sdfs_createfile(QString::number(lineCount).toAscii().constData(),BLOCKLENGTH,1);
     int testfd = sky_sdfs_openfile(testfid,O_WRITE);
-    char buff[2*1024*1024];
+    char buff[BUFFSIZE];
     int result = sky_sdfs_read(testfd,buff,sizeof(buff));
     qDebug()<<result<<testfd;
     if(result == -1 and testfd != -1){
@@ -229,16 +252,16 @@ void MainWindow::on_test_87_2_clicked()
         ui->textEdit->append(QString::number(lineCount) + " -----> use write mode to read file           test    FAIL");
         lineCount++;
     }
-    sky_sdfs_cleanup();
+    //    sky_sdfs_cleanup();
 }
 
 
 void MainWindow::on_test_87_3_clicked()
 {
-    sky_sdfs_init("config.ini");
-    long long testfid = sky_sdfs_createfile("testfilename",256*1024*1024,1);
+    //    sky_sdfs_init("config.ini");
+    long long testfid = sky_sdfs_createfile("testfilename",BLOCKLENGTH,1);
     int testfd = sky_sdfs_openfile(testfid,O_READ);
-    char buff[2*1024*1024];
+    char buff[BUFFSIZE];
     int result = sky_sdfs_write(testfd,buff,sizeof(buff));
     qDebug()<<result;
     if(result == -1 and testfd != -1){
@@ -254,17 +277,15 @@ void MainWindow::on_test_87_3_clicked()
         ui->textEdit->append(QString::number(lineCount) + " -----> use read mode to write file           test    FAIL");
         lineCount++;
     }
-    sky_sdfs_cleanup();
 }
 
 
 void MainWindow::on_test_90_1_clicked()
 {
-    sky_sdfs_init("config.ini");
-    long long testfid = sky_sdfs_createfile("testfilename",256*1024*1024,1);
+    long long testfid = sky_sdfs_createfile("testfilename",BLOCKLENGTH,1);
     int testfd = sky_sdfs_openfile(testfid,O_WRITE);
     sky_sdfs_close(testfd);
-    char buff[2*1024*1024];
+    char buff[BUFFSIZE];
     int result = sky_sdfs_write(testfd,buff,sizeof(buff));
     qDebug()<<result;
     if(result == -1 and testfd != -1){
@@ -280,16 +301,16 @@ void MainWindow::on_test_90_1_clicked()
         ui->textEdit->append(QString::number(lineCount) + " -----> write to the closed file           test    FAIL");
         lineCount++;
     }
-    sky_sdfs_cleanup();
+    //    sky_sdfs_cleanup();
 }
 
 void MainWindow::on_test_90_2_clicked()
 {
-    sky_sdfs_init("config.ini");
-    long long testfid = sky_sdfs_createfile("testfilename",256*1024*1024,1);
+    //    sky_sdfs_init("config.ini");
+    long long testfid = sky_sdfs_createfile("testfilename",BLOCKLENGTH,1);
     int testfd = sky_sdfs_openfile(testfid,O_READ);
     sky_sdfs_close(testfd);
-    char buff[2*1024*1024];
+    char buff[BUFFSIZE];
     int result = sky_sdfs_read(testfd,buff,sizeof(buff));
     qDebug()<<result;
     if(result == -1 and testfd != -1){
@@ -305,5 +326,78 @@ void MainWindow::on_test_90_2_clicked()
             lineCount++;
         }
     }
-    sky_sdfs_cleanup();
+    //    sky_sdfs_cleanup();
+}
+
+void MainWindow::on_readFileButton_clicked()
+{
+    readFileID = atoi(ui->lineEdit_6->text().toAscii());
+    int fd = sky_sdfs_openfile(readFileID,O_READ);
+    //   qDebug()<<fd;
+    QFile testFile("FileId_" + QString("%1").arg(readFileID));
+
+    if(testFile.open(QIODevice::WriteOnly) and fd > 0){
+        char buff[BUFFSIZE];
+        while(TRUE){
+            int result = 0;
+            result = sky_sdfs_read(fd,buff,sizeof(buff));
+            //                      qDebug()<<"Thread "<<name<<"read= "<<result;
+            if (result > 0){
+                qint64 writelength = testFile.write(buff,result);
+            }
+            else{
+                if(result == -1){
+                    char name1[100];
+                    qDebug()<<"ERROR:"<<getlasterror(fd,name1,100)<<name1;
+                }
+                else{
+                    ui->textEdit->append(QString::number(lineCount)+ " ----->" + testFile.fileName() + "  file download OK");
+                    lineCount++;
+                    break;
+                }
+
+            }
+        }
+        testFile.close();
+    }
+    else{
+        ui->textEdit->append(QString::number(lineCount)+ " ----->" + testFile.fileName() + "  file download Fail");
+        lineCount++;
+    }
+}
+
+void MainWindow::on_upLocalFile_Ex_clicked()
+{
+    QString videoFile = QFileDialog::getOpenFileName(
+                this,
+                tr("choose the video file"),
+                QDir::currentPath());
+
+    QString idxFile = QFileDialog::getOpenFileName(
+                this,
+                tr("choose the video file"),
+                QDir::currentPath(),
+                tr("Index (*.idx)"));
+    if (!videoFile.isNull() and !idxFile.isNull()) {
+        QString startTime = "2012-06-29 12:12:12.012";
+        int copies = atoi(ui->lineEdit_3->text().toAscii());
+        long long videoFid = sky_sdfs_createfile_ex(videoFile.toAscii().constData(),
+                                                   BLOCKLENGTH,
+                                                   copies,
+                                                   NORMAL_FILE,
+                                                   startTime.toAscii().data(),
+                                                   0);
+
+        uploadFile(videoFid,videoFile);
+        long long idxFid = sky_sdfs_createfile_ex(idxFile.toAscii().constData(),
+                                         BLOCKLENGTH,
+                                         copies,
+                                         INDEX_FILE,
+                                         startTime.toAscii().data(),
+                                         videoFid);
+        uploadFile(idxFid,idxFile);
+        ui->textEdit->append("videoFid= "+  QString::number(videoFid) + "    idxFid= " + QString::number(idxFid));
+        lineCount++;
+    }
+
 }

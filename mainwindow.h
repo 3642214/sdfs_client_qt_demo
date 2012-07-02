@@ -35,6 +35,8 @@ private:
     int lineCount;
     void btnOn();
     void btnOff();
+    int readFileID;
+    bool uploadFile(long long fileFid, QString fileName);
 private slots:
     void threadOver();
     void on_test_87_1_clicked();
@@ -42,6 +44,8 @@ private slots:
     void on_test_87_3_clicked();
     void on_test_90_1_clicked();
     void on_test_90_2_clicked();
+    void on_readFileButton_clicked();
+    void on_upLocalFile_Ex_clicked();
 };
 
 #endif // MAINWINDOW_H
