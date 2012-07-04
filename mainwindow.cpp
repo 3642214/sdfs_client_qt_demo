@@ -2,7 +2,6 @@
 #include "ui_mainwindow.h"
 #include "QDebug"
 #include "QFileDialog"
-#include "SkySDFSSDK.h"
 #include "qfile.h"
 #include "QDataStream"
 #include <QApplication>
@@ -23,6 +22,7 @@ MainWindow::MainWindow(QWidget *parent) :
     timer = new QTimer(this);
     connect(timer,SIGNAL(timeout()),this,SLOT(isThreadFinished()));
     test = new testinfo;
+    info = new fileinfo;
     threadList = new QList<workThread*>;
     ui->setupUi(this);
     ui->textEdit->ensureCursorVisible();
@@ -44,6 +44,10 @@ void MainWindow::changeTestinfo()
     test->copysize = atoi(ui->lineEdit_3->text().toAscii());
     test->buffsize = atoi(ui->lineEdit_4->text().toAscii());
     test->filesize = atoi(ui->lineEdit_5->text().toAscii());
+    if(test->filesize < test->buffsize){
+        test->buffsize = test->filesize;
+        ui->lineEdit_4->setText(QString::number(test->filesize));
+    }
 }
 
 void MainWindow::createThread()
@@ -100,7 +104,7 @@ bool MainWindow::uploadFile(long long fileFid,QString fileName)
         char buff[BUFFSIZE];
         while(!file.atEnd()){
             int size = file.read(buff,sizeof(buff));
-//            qDebug()<<"write start";
+            //            qDebug()<<"write start";
             int result = sky_sdfs_write(fileFd,buff,size);
             //                 qDebug()<<result;
             if(result == -1){
@@ -207,11 +211,9 @@ void MainWindow::on_upLocalFile_clicked()
                         +" fileFid= "
                         +  QString::number(fileFid)
                         + "  upload OK");
-            lineCount++;
         }
         else{
             ui->textEdit->append("upload fail");
-            lineCount++;
         }
     }
 }
@@ -375,29 +377,66 @@ void MainWindow::on_upLocalFile_Ex_clicked()
 
     QString idxFile = QFileDialog::getOpenFileName(
                 this,
-                tr("choose the video file"),
+                tr("choose the index file"),
                 QDir::currentPath(),
                 tr("Index (*.idx)"));
     if (!videoFile.isNull() and !idxFile.isNull()) {
         QString startTime = "2012-06-29 12:12:12.012";
         int copies = atoi(ui->lineEdit_3->text().toAscii());
         long long videoFid = sky_sdfs_createfile_ex(videoFile.toAscii().constData(),
-                                                   BLOCKLENGTH,
-                                                   copies,
-                                                   NORMAL_FILE,
-                                                   startTime.toAscii().data(),
-                                                   0);
+                                                    BLOCKLENGTH,
+                                                    copies,
+                                                    NORMAL_FILE,
+                                                    startTime.toAscii().data(),
+                                                    0);
 
         uploadFile(videoFid,videoFile);
         long long idxFid = sky_sdfs_createfile_ex(idxFile.toAscii().constData(),
-                                         BLOCKLENGTH,
-                                         copies,
-                                         INDEX_FILE,
-                                         startTime.toAscii().data(),
-                                         videoFid);
+                                                  BLOCKLENGTH,
+                                                  copies,
+                                                  INDEX_FILE,
+                                                  startTime.toAscii().data(),
+                                                  videoFid);
         uploadFile(idxFid,idxFile);
         ui->textEdit->append("videoFid= "+  QString::number(videoFid) + "    idxFid= " + QString::number(idxFid));
-        lineCount++;
+    }
+
+}
+
+void MainWindow::on_readFileInfo_clicked()
+{
+    readFileID = atoi(ui->lineEdit_6->text().toAscii());
+    int res = sky_sdfs_fileinfo(readFileID,info);
+    qDebug()<<res
+            <<info->beginTime
+            <<info->blocklength
+            <<info->blocksize
+            <<info->copysize
+            <<info->fileid
+            <<info->filemode
+            <<info->filetype
+            <<info->link
+            <<info->name
+            <<info->owner;
+    if(res == 0){
+        ui->textEdit->append("================ File Info ================");
+        ui->textEdit->append("readFileID: " + QString::number(readFileID));
+        ui->textEdit->append("beginTime: " + QString::number(info->beginTime));
+        ui->textEdit->append("blocklength: " + QString::number(info->blocklength));
+        ui->textEdit->append("blocksize: " + QString::number(info->blocksize));
+        ui->textEdit->append("copysize: " + QString::number(info->copysize));
+        ui->textEdit->append("fileid: " + QString::number(info->fileid));
+        ui->textEdit->append("filemode: " + QString::number(info->filemode));
+        ui->textEdit->append("filetype: " + QString::number(info->filetype));
+        ui->textEdit->append("link: " + QString::number(info->link));
+        ui->textEdit->append("name: " + QString(info->name));
+        ui->textEdit->append("owner: " + QString::number(info->owner));
+        ui->textEdit->append("================ File Info ================");
+    }
+    else{
+       ui->textEdit->append("======= not ================ find =========");
+       ui->textEdit->append("readFileID: " + QString::number(readFileID) + "   file not find");
+       ui->textEdit->append("======= not ================ find =========");
     }
 
 }

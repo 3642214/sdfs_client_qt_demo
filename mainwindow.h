@@ -3,6 +3,7 @@
 
 #include <QMainWindow>
 #include "workthread.h"
+#include "SkySDFSSDK.h"
 namespace Ui {
 class MainWindow;
 }
@@ -26,6 +27,7 @@ private slots:
 private:
     Ui::MainWindow *ui;
     testinfo* test;
+    fileinfo* info;
     QList<workThread*>* threadList;
     void changeTestinfo();
     void createThread();
@@ -46,6 +48,7 @@ private slots:
     void on_test_90_2_clicked();
     void on_readFileButton_clicked();
     void on_upLocalFile_Ex_clicked();
+    void on_readFileInfo_clicked();
 };
 
 #endif // MAINWINDOW_H

@@ -48,7 +48,7 @@ void workThread::run()
 void workThread::testCreate()
 {
     this->init();
-    fileID = sky_sdfs_createfile("test",testinfo1->blocklength*1024*1024,testinfo1->copysize);
+    fileID = sky_sdfs_createfile(name.toAscii().constData(),testinfo1->blocklength*1024*1024,testinfo1->copysize);
     qDebug()<<"Thread"<<name<<":"<<"fileID="<<fileID<<";blocklength="<<testinfo1->blocklength<<";copysize="<<testinfo1->copysize;
     if(fileID > 0){
         testinfo1->result = name + "    testCreate    true";
