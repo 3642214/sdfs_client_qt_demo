@@ -9,6 +9,7 @@
 #include "QDataStream"
 #include "QTimer"
 #include "QList"
+#include "QFileInfo"
 
 
 #define BUFFSIZE		1024*1024
@@ -127,7 +128,7 @@ bool MainWindow::uploadFile(long long fileFid,QString fileName)
 
 void MainWindow::threadOver()
 {
-    ui->textEdit->append(QString::number(lineCount) + " -----> thread       " +  "      " +test->result);
+    ui->textEdit->append(QString::number(lineCount) + " -----> thread       " + "      " +test->result);
     lineCount++;
     //    qDebug()<<"thread"<<name<<"is stop";
 }
@@ -198,12 +199,16 @@ void MainWindow::on_readButton_clicked()
 void MainWindow::on_upLocalFile_clicked()
 {
 
-    QString fileName = QFileDialog::getOpenFileName(
+    QString file = QFileDialog::getOpenFileName(
                 this,
                 QDir::currentPath());
-    if (!fileName.isNull()) {
+    if (!file.isNull()) {
         int copies = atoi(ui->lineEdit_3->text().toAscii());
-        long long fileFid = sky_sdfs_createfile(fileName.toAscii().constData(),BLOCKLENGTH,copies);
+        QFileInfo fileInfo(file);
+        QString fileName = fileInfo.fileName();
+        long long fileFid = sky_sdfs_createfile(fileName.toAscii().constData(),
+                                                BLOCKLENGTH,
+                                                copies);
         if(uploadFile(fileFid,fileName)){
             ui->textEdit->append(
                         "fileName= "
@@ -383,7 +388,9 @@ void MainWindow::on_upLocalFile_Ex_clicked()
     if (!videoFile.isNull() and !idxFile.isNull()) {
         QString startTime = "2012-06-29 12:12:12.012";
         int copies = atoi(ui->lineEdit_3->text().toAscii());
-        long long videoFid = sky_sdfs_createfile_ex(videoFile.toAscii().constData(),
+        qDebug()<<videoFile;
+        QFileInfo fileInfo1(videoFile);
+        long long videoFid = sky_sdfs_createfile_ex(fileInfo1.fileName().toAscii().constData(),
                                                     BLOCKLENGTH,
                                                     copies,
                                                     NORMAL_FILE,
@@ -391,7 +398,8 @@ void MainWindow::on_upLocalFile_Ex_clicked()
                                                     0);
 
         uploadFile(videoFid,videoFile);
-        long long idxFid = sky_sdfs_createfile_ex(idxFile.toAscii().constData(),
+        QFileInfo fileInfo2(idxFile);
+        long long idxFid = sky_sdfs_createfile_ex(fileInfo2.fileName().toAscii().constData(),
                                                   BLOCKLENGTH,
                                                   copies,
                                                   INDEX_FILE,
