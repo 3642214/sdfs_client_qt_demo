@@ -39,15 +39,15 @@ extern "C" {
 typedef struct fileinfo{
 	long long 	fileid;
 	char 		name[100];
-	int			filetype;
+    int		    filetype;
 	int 		filemode;
-	long long 	beginTime;
+	char	 	beginTime[23];
 	int 		owner;
-	int			copysize;
+    int		    copysize;
 	int 		blocksize;
 	long long 	link;
 	int 		blocklength;
-	}fileinfo;
+}fileinfo;
 
 SKY_SDFS_API(int) sky_sdfs_init(char* path);
 SKY_SDFS_API(int) sky_sdfs_cleanup(void);

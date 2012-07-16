@@ -101,6 +101,7 @@ void workThread::testWrite()
                 testinfo1->result = name + "    testWrite   false";
                 qDebug()<<"Thread "<<name<<"upload fail";
                 qDebug()<<"Thread"<<name<<":"<<"Write ------------------------->fail";
+                delete [] buffer;
                 return;
             }
         } 
