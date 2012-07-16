@@ -15,6 +15,8 @@ class MainWindow : public QMainWindow
 public:
     explicit MainWindow(QWidget *parent = 0);
     ~MainWindow();
+    void setMode(int Mode);
+    void upFile(int thread,int blockLenth,int copysize,int buff,int fileSize);
     
 private slots:
     void isThreadFinished();
@@ -34,9 +36,9 @@ private:
     void runThread();
     void threadOver(QString name);
     QTimer *timer;
-    int lineCount;
     void btnOn();
     void btnOff();
+    int lineCount;
     int readFileID;
     bool uploadFile(long long fileFid, QString fileName);
 private slots:

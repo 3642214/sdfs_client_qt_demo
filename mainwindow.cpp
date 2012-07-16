@@ -14,6 +14,8 @@
 
 #define BUFFSIZE		1024*1024
 #define BLOCKLENGTH     256*1024*1024
+#define ADVANCE_MODE 1
+#define NORMAL_MODE 0
 
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
@@ -27,6 +29,8 @@ MainWindow::MainWindow(QWidget *parent) :
     ui->setupUi(this);
     ui->textEdit->ensureCursorVisible();
     sky_sdfs_init("config.ini");
+    ui->groupBox_AutoTest->setEnabled(false);
+    ui->groupBox_TestLink->setEnabled(false);
 }
 
 MainWindow::~MainWindow()
@@ -35,25 +39,50 @@ MainWindow::~MainWindow()
     delete ui;
 }
 
+void MainWindow::setMode(int Mode)
+{
+    if(Mode == ADVANCE_MODE){
+        ui->groupBox_AutoTest->setEnabled(true);
+        ui->groupBox_TestLink->setEnabled(true);
+    }
+}
+
+void MainWindow::upFile(int thread, int blockLenth, int copysize, int buff, int fileSize)
+{
+    ui->lineEdit_thread->setText(QString::number(thread));
+    ui->lineEdit_blockLenth->setText(QString::number(blockLenth));
+    ui->lineEdit_copySize->setText(QString::number(copysize));
+    ui->lineEdit_buffSize->setText(QString::number(buff));
+    ui->lineEdit_fileSize->setText(QString::number(fileSize));
+    setMode(ADVANCE_MODE);
+    ui->writeButton->click();
+    while(true){
+        isThreadFinished();
+        if(threadList->isEmpty()){
+            exit(0);
+        }
+    }
+}
+
 
 void MainWindow::changeTestinfo()
 {
     btnOff();
     test->result = "false";
-    test->blocklength = atoi(ui->lineEdit_2->text().toAscii());
-    test->copysize = atoi(ui->lineEdit_3->text().toAscii());
-    test->buffsize = atoi(ui->lineEdit_4->text().toAscii());
-    test->filesize = atoi(ui->lineEdit_5->text().toAscii());
+    test->blocklength = atoi(ui->lineEdit_blockLenth->text().toAscii());
+    test->copysize = atoi(ui->lineEdit_copySize->text().toAscii());
+    test->buffsize = atoi(ui->lineEdit_buffSize->text().toAscii());
+    test->filesize = atoi(ui->lineEdit_fileSize->text().toAscii());
     if(test->filesize < test->buffsize){
         test->buffsize = test->filesize;
-        ui->lineEdit_4->setText(QString::number(test->filesize));
+        ui->lineEdit_fileSize->setText(QString::number(test->filesize));
     }
 }
 
 void MainWindow::createThread()
 {
     threadList->clear();
-    for(int i=1;i<=atoi(ui->lineEdit->text().toAscii());i++)
+    for(int i=1;i<=atoi(ui->lineEdit_thread->text().toAscii());i++)
     {
         workThread *thread = new workThread(QString::number(i),test);
         threadList->push_back(thread);
@@ -64,7 +93,7 @@ void MainWindow::createThread()
 
 void MainWindow::runThread()
 {
-    for(int i=0;i<atoi(ui->lineEdit->text().toAscii());i++)
+    for(int i=0;i<atoi(ui->lineEdit_thread->text().toAscii());i++)
     {
 
         threadList->at(i)->start();
@@ -84,14 +113,16 @@ void MainWindow::threadOver(QString name)
 
 void MainWindow::btnOn()
 {
-    ui->widget->setEnabled(true);
-    ui->widget_2->setEnabled(true);
+    ui->groupBox_AutoTest->setEnabled(true);
+    ui->groupBox_ManualTest->setEnabled(true);
+    ui->groupBox_TestLink->setEnabled(true);
 }
 
 void MainWindow::btnOff()
 {
-    ui->widget->setEnabled(false);
-    ui->widget_2->setEnabled(false);
+    ui->groupBox_AutoTest->setEnabled(false);
+    ui->groupBox_ManualTest->setEnabled(false);
+    ui->groupBox_TestLink->setEnabled(false);
 }
 
 bool MainWindow::uploadFile(long long fileFid,QString fileName)
@@ -202,7 +233,7 @@ void MainWindow::on_upLocalFile_clicked()
                 this,
                 QDir::currentPath());
     if (!file.isNull()) {
-        int copies = atoi(ui->lineEdit_3->text().toAscii());
+        int copies = atoi(ui->lineEdit_copySize->text().toAscii());
         QFileInfo fileInfo(file);
         //        QString fileName = fileInfo.fileName();
         long long fileFid = sky_sdfs_createfile(fileInfo.fileName().toUtf8().constData(),
@@ -396,7 +427,7 @@ void MainWindow::on_upLocalFile_Ex_clicked()
         QString startTime = qdate.toString("yyyy-MM-dd hh:mm:ss.zzz");
 
 //        qDebug()<<startTime;
-        int copies = atoi(ui->lineEdit_3->text().toAscii());
+        int copies = atoi(ui->lineEdit_copySize->text().toAscii());
         qDebug()<<videoFile;
         QFileInfo fileInfo1(videoFile);
         long long videoFid = sky_sdfs_createfile_ex(fileInfo1.fileName().toAscii().constData(),
