@@ -281,7 +281,7 @@
         <property name="minimumSize">
          <size>
           <width>0</width>
-          <height>50</height>
+          <height>60</height>
          </size>
         </property>
         <property name="title">
@@ -290,8 +290,8 @@
         <widget class="QPushButton" name="readFileButton">
          <property name="geometry">
           <rect>
-           <x>140</x>
-           <y>14</y>
+           <x>127</x>
+           <y>21</y>
            <width>101</width>
            <height>27</height>
           </rect>
@@ -303,8 +303,8 @@
         <widget class="QLineEdit" name="lineEdit_6">
          <property name="geometry">
           <rect>
-           <x>60</x>
-           <y>14</y>
+           <x>42</x>
+           <y>21</y>
            <width>80</width>
            <height>27</height>
           </rect>
@@ -316,8 +316,8 @@
         <widget class="QPushButton" name="upLocalFile">
          <property name="geometry">
           <rect>
-           <x>440</x>
-           <y>14</y>
+           <x>448</x>
+           <y>21</y>
            <width>101</width>
            <height>27</height>
           </rect>
@@ -329,8 +329,8 @@
         <widget class="QLabel" name="label_5">
          <property name="geometry">
           <rect>
-           <x>31</x>
-           <y>20</y>
+           <x>15</x>
+           <y>27</y>
            <width>21</width>
            <height>17</height>
           </rect>
@@ -342,8 +342,8 @@
         <widget class="QPushButton" name="readFileInfo">
          <property name="geometry">
           <rect>
-           <x>240</x>
-           <y>14</y>
+           <x>234</x>
+           <y>21</y>
            <width>101</width>
            <height>27</height>
           </rect>
@@ -355,8 +355,8 @@
         <widget class="QPushButton" name="upLocalFile_Ex">
          <property name="geometry">
           <rect>
-           <x>340</x>
-           <y>14</y>
+           <x>341</x>
+           <y>21</y>
            <width>101</width>
            <height>27</height>
           </rect>
@@ -394,7 +394,7 @@
            <property name="geometry">
             <rect>
              <x>10</x>
-             <y>80</y>
+             <y>88</y>
              <width>80</width>
              <height>27</height>
             </rect>
@@ -407,7 +407,7 @@
            <property name="geometry">
             <rect>
              <x>10</x>
-             <y>110</y>
+             <y>118</y>
              <width>80</width>
              <height>27</height>
             </rect>
@@ -420,7 +420,7 @@
            <property name="geometry">
             <rect>
              <x>10</x>
-             <y>50</y>
+             <y>58</y>
              <width>80</width>
              <height>27</height>
             </rect>
@@ -433,7 +433,7 @@
            <property name="geometry">
             <rect>
              <x>10</x>
-             <y>140</y>
+             <y>148</y>
              <width>80</width>
              <height>27</height>
             </rect>
@@ -446,7 +446,7 @@
            <property name="geometry">
             <rect>
              <x>10</x>
-             <y>20</y>
+             <y>28</y>
              <width>80</width>
              <height>27</height>
             </rect>
