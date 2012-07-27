@@ -9,7 +9,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>580</width>
+    <width>645</width>
     <height>410</height>
    </rect>
   </property>
@@ -363,6 +363,19 @@
          </property>
          <property name="text">
           <string>上传录像and索引</string>
+         </property>
+        </widget>
+        <widget class="QLineEdit" name="uploadCount">
+         <property name="geometry">
+          <rect>
+           <x>560</x>
+           <y>20</y>
+           <width>41</width>
+           <height>27</height>
+          </rect>
+         </property>
+         <property name="text">
+          <string>1</string>
          </property>
         </widget>
        </widget>

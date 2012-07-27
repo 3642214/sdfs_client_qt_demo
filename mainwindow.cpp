@@ -127,6 +127,7 @@ void MainWindow::btnOff()
 
 bool MainWindow::uploadFile(long long fileFid,QString fileName)
 {
+    bool result = false;
     long long allrst = 0;
     int fileFd = sky_sdfs_openfile(fileFid,O_WRITE);
     qDebug()<<"fileName= "<<fileName<<" fileFid="<<fileFid<<" fileFd="<<fileFd;
@@ -141,18 +142,19 @@ bool MainWindow::uploadFile(long long fileFid,QString fileName)
             if(result == -1){
                 char name[100];
                 qDebug()<<"ERROR:"<<getlasterror(fileFd,name,100)<<name;
-                return false;
+                break;
             }
             else{
                 allrst +=result;
             }
             qDebug()<<allrst<<"/"<<file.size();
         }
-        return true;
+        result = true;
     }
 
     file.close();
     sky_sdfs_close(fileFd);
+    return result;
 }
 
 
@@ -226,6 +228,9 @@ void MainWindow::on_readButton_clicked()
     runThread();
 }
 
+
+
+
 void MainWindow::on_upLocalFile_clicked()
 {
 
@@ -236,19 +241,21 @@ void MainWindow::on_upLocalFile_clicked()
         int copies = atoi(ui->lineEdit_copySize->text().toAscii());
         QFileInfo fileInfo(file);
         //        QString fileName = fileInfo.fileName();
-        long long fileFid = sky_sdfs_createfile(fileInfo.fileName().toUtf8().constData(),
-                                                BLOCKLENGTH,
-                                                copies);
-        if(uploadFile(fileFid,file)){
-            ui->textEdit->append(
-                        "fileName= "
-                        +  file
-                        +" fileFid= "
-                        +  QString::number(fileFid)
-                        + "  upload OK");
-        }
-        else{
-            ui->textEdit->append("upload fail");
+        for(int i=0;i<ui->uploadCount->text().toInt();i++){
+            long long fileFid = sky_sdfs_createfile(fileInfo.fileName().toUtf8().constData(),
+                                                    BLOCKLENGTH,
+                                                    copies);
+            if(uploadFile(fileFid,file)){
+                ui->textEdit->append(
+                            "fileName= "
+                            +  file
+                            +" fileFid= "
+                            +  QString::number(fileFid)
+                            + "  upload OK");
+            }
+            else{
+                ui->textEdit->append("upload fail");
+            }
         }
     }
 }
@@ -421,12 +428,12 @@ void MainWindow::on_upLocalFile_Ex_clicked()
                 QDir::currentPath(),
                 tr("Index (*.idx)"));
     if (!videoFile.isNull() and !idxFile.isNull()) {
-//        QString startTime = "2012-06-29 12:12:12.012";
+        //        QString startTime = "2012-06-29 12:12:12.012";
 
         QDateTime qdate = QDateTime::currentDateTime();
         QString startTime = qdate.toString("yyyy-MM-dd hh:mm:ss.zzz");
 
-//        qDebug()<<startTime;
+        //        qDebug()<<startTime;
         int copies = atoi(ui->lineEdit_copySize->text().toAscii());
         qDebug()<<videoFile;
         QFileInfo fileInfo1(videoFile);

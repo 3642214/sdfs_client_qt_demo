@@ -2,6 +2,7 @@
 #include "mainwindow.h"
 #include <QTextCodec>
 #include <QDebug>
+#include <getopt.h>
 
 int main(int argc, char *argv[])
 {
