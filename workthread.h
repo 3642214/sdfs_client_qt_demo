@@ -1,10 +1,11 @@
 #ifndef WORKTHREAD_H
 #define WORKTHREAD_H
 
-#define T_CRTEATE			1
+#define T_CRTEATE		1
 #define T_OPEN			2
 #define T_WRITE			3
 #define T_READ			4
+#define T_UPLOAD        5
 
 #include <QThread>
 #include <QFile>
@@ -19,6 +20,8 @@ typedef struct testinfo{
     long      filesize;
     int        openMode;
     QString      result;
+    QList<QString>  filePath;
+    int       count;
     }testinfo;
 
 class workThread : public QThread
@@ -35,12 +38,16 @@ public:
 
 public slots:
 
+signals:
+    void changeText(QString str);
 private:
     void init();
     void testCreate();
     void testOpen(int mode);
     void testWrite();
     void testRead();
+    void testUpload();
+    bool uploadFile(long long fileFid, QString fileName);
     void close();
 
 private:
@@ -52,6 +59,7 @@ private:
     bool checkFile(QFile file1,QFile file2);
     qint64 allDownloadFileSize;
     qint64 allUploadFileSize ;
+    char errorCode[100];
 
 public:
     QString name;

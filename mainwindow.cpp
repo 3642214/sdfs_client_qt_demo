@@ -11,6 +11,7 @@
 #include "QList"
 #include "QFileInfo"
 #include "QDateTime"
+#include "QMessageBox"
 
 #define BUFFSIZE		1024*1024
 #define BLOCKLENGTH     256*1024*1024
@@ -31,10 +32,17 @@ MainWindow::MainWindow(QWidget *parent) :
     sky_sdfs_init("config.ini");
     ui->groupBox_AutoTest->setEnabled(false);
     ui->groupBox_TestLink->setEnabled(false);
+    ui->deleteFileButton->setEnabled(false);
 }
 
 MainWindow::~MainWindow()
 {
+    if(!threadList->isEmpty()){
+        for(int i=0;i<threadList->length();i++)
+        {
+            threadList->at(i)->quit();
+        }
+    }
     sky_sdfs_cleanup();
     delete ui;
 }
@@ -44,6 +52,7 @@ void MainWindow::setMode(int Mode)
     if(Mode == ADVANCE_MODE){
         ui->groupBox_AutoTest->setEnabled(true);
         ui->groupBox_TestLink->setEnabled(true);
+        ui->deleteFileButton->setEnabled(true);
     }
 }
 
@@ -87,6 +96,7 @@ void MainWindow::createThread()
         workThread *thread = new workThread(QString::number(i),test);
         threadList->push_back(thread);
         connect(thread,SIGNAL(finished()),this,SLOT(threadOver()));
+        connect(thread,SIGNAL(changeText(QString)),this,SLOT(setLog(QString)));
         //        qDebug()<<i;
     }
 }
@@ -127,7 +137,7 @@ void MainWindow::btnOff()
 
 bool MainWindow::uploadFile(long long fileFid,QString fileName)
 {
-    bool result = false;
+    bool res = false;
     long long allrst = 0;
     int fileFd = sky_sdfs_openfile(fileFid,O_WRITE);
     qDebug()<<"fileName= "<<fileName<<" fileFid="<<fileFid<<" fileFd="<<fileFd;
@@ -136,7 +146,7 @@ bool MainWindow::uploadFile(long long fileFid,QString fileName)
         char buff[BUFFSIZE];
         while(!file.atEnd()){
             int size = file.read(buff,sizeof(buff));
-            //            qDebug()<<"write start";
+            //                        qDebug()<<"write start" << size;
             int result = sky_sdfs_write(fileFd,buff,size);
             //                 qDebug()<<result;
             if(result == -1){
@@ -149,20 +159,24 @@ bool MainWindow::uploadFile(long long fileFid,QString fileName)
             }
             qDebug()<<allrst<<"/"<<file.size();
         }
-        result = true;
+        res = true;
     }
-
     file.close();
     sky_sdfs_close(fileFd);
-    return result;
+    return res;
+}
+
+void MainWindow::setLog(QString text)
+{
+    ui->textEdit->append(text);
 }
 
 
 void MainWindow::threadOver()
 {
-    ui->textEdit->append(QString::number(lineCount) + " -----> thread       " + "      " +test->result);
-    lineCount++;
-    //    qDebug()<<"thread"<<name<<"is stop";
+    //    ui->textEdit->append(QString::number(lineCount) + " -----> thread       " + "      " +test->result);
+    //    lineCount++;
+    //        qDebug()<<"thread"<<name<<"is stop";
 }
 
 void MainWindow::isThreadFinished()
@@ -180,7 +194,7 @@ void MainWindow::isThreadFinished()
         {
             if(threadList->at(i)->isFinished())
             {
-                threadOver(threadList->at(i)->name);
+                //                threadOver(threadList->at(i)->name);
                 threadList->removeAt(i);
                 //                qDebug()<<"xiancehgns"<<threadList->length();
             }
@@ -201,7 +215,6 @@ void MainWindow::on_writeButton_clicked()
     changeTestinfo();
     test->testFunc = T_WRITE;
     createThread();
-    //    threadList->at(12)->start();
     runThread();
 }
 
@@ -233,30 +246,18 @@ void MainWindow::on_readButton_clicked()
 
 void MainWindow::on_upLocalFile_clicked()
 {
-
-    QString file = QFileDialog::getOpenFileName(
+    QList<QString> fileList = QFileDialog::getOpenFileNames(
                 this,
                 QDir::currentPath());
-    if (!file.isNull()) {
-        int copies = atoi(ui->lineEdit_copySize->text().toAscii());
-        QFileInfo fileInfo(file);
-        //        QString fileName = fileInfo.fileName();
-        for(int i=0;i<ui->uploadCount->text().toInt();i++){
-            long long fileFid = sky_sdfs_createfile(fileInfo.fileName().toUtf8().constData(),
-                                                    BLOCKLENGTH,
-                                                    copies);
-            if(uploadFile(fileFid,file)){
-                ui->textEdit->append(
-                            "fileName= "
-                            +  file
-                            +" fileFid= "
-                            +  QString::number(fileFid)
-                            + "  upload OK");
-            }
-            else{
-                ui->textEdit->append("upload fail");
-            }
-        }
+
+    if (!fileList.isEmpty()) {
+        changeTestinfo();
+        ui->selectFileCount->setText(QString::number(fileList.length()));
+        test->filePath = fileList;
+        test->count = ui->uploadCount->text().toInt();
+        test->testFunc = T_UPLOAD;
+        createThread();
+        runThread();
     }
 }
 
@@ -370,7 +371,6 @@ void MainWindow::on_test_90_2_clicked()
             lineCount++;
         }
     }
-    //    sky_sdfs_cleanup();
 }
 
 void MainWindow::on_readFileButton_clicked()
@@ -395,6 +395,7 @@ void MainWindow::on_readFileButton_clicked()
                     if(result == -1){
                         char name1[100];
                         qDebug()<<"ERROR:"<<getlasterror(fd,name1,100)<<name1;
+                        break;
                     }
                     else{
                         ui->textEdit->append(QString::number(lineCount)+ " ----->" + testFile.fileName() + "  file download OK");
@@ -427,13 +428,16 @@ void MainWindow::on_upLocalFile_Ex_clicked()
                 tr("choose the index file"),
                 QDir::currentPath(),
                 tr("Index (*.idx)"));
+
     if (!videoFile.isNull() and !idxFile.isNull()) {
-        //        QString startTime = "2012-06-29 12:12:12.012";
+        //                QString startTime = "2012-06-29 12:12:12.012";
 
-        QDateTime qdate = QDateTime::currentDateTime();
-        QString startTime = qdate.toString("yyyy-MM-dd hh:mm:ss.zzz");
-
+        //        QDateTime qdate = QDateTime::currentDateTime();
+        QString startTime = ui->dateTimeEdit->text();
         //        qDebug()<<startTime;
+        //        QString startTime = qdate.toString("yyyy-MM-dd hh:mm:ss.zzz");
+
+        //                qDebug()<<startTime;
         int copies = atoi(ui->lineEdit_copySize->text().toAscii());
         qDebug()<<videoFile;
         QFileInfo fileInfo1(videoFile);
@@ -444,18 +448,30 @@ void MainWindow::on_upLocalFile_Ex_clicked()
                                                     startTime.toAscii().data(),
                                                     0);
 
-        uploadFile(videoFid,videoFile);
-        QFileInfo fileInfo2(idxFile);
-        long long idxFid = sky_sdfs_createfile_ex(fileInfo2.fileName().toAscii().constData(),
-                                                  BLOCKLENGTH,
-                                                  copies,
-                                                  INDEX_FILE,
-                                                  startTime.toAscii().data(),
-                                                  videoFid);
-        uploadFile(idxFid,idxFile);
-        ui->textEdit->append("videoFid= "+  QString::number(videoFid) + "    idxFid= " + QString::number(idxFid));
+        if(uploadFile(videoFid,videoFile)){
+            QFileInfo fileInfo2(idxFile);
+            long long idxFid = sky_sdfs_createfile_ex(fileInfo2.fileName().toAscii().constData(),
+                                                      BLOCKLENGTH,
+                                                      copies,
+                                                      INDEX_FILE,
+                                                      startTime.toAscii().data(),
+                                                      videoFid);
+            if(uploadFile(idxFid,idxFile)){
+                ui->textEdit->append("videoFid= "
+                                     +  QString::number(videoFid)
+                                     + "    idxFid= "
+                                     + QString::number(idxFid));
+            }
+            else{
+                ui->textEdit->append("videoFid= "
+                                     +  QString::number(videoFid)
+                                     + "    idx  upload fail");
+            }
+        }
+        else{
+            ui->textEdit->append("video upload fail");
+        }
     }
-
 }
 
 void MainWindow::on_readFileInfo_clicked()
@@ -485,7 +501,6 @@ void MainWindow::on_readFileInfo_clicked()
         ui->textEdit->append("filemode: " + QString::number(info->filemode));
         ui->textEdit->append("filetype: " + QString::number(info->filetype));
         ui->textEdit->append("link: " + QString::number(info->link));
-        //        qDebug()<<QString::fromUtf8(info->name);
         ui->textEdit->append("name: " + QString::fromUtf8(info->name));
         ui->textEdit->append("owner: " + QString::number(info->owner));
         ui->textEdit->append("================ File Info ================");
@@ -496,4 +511,18 @@ void MainWindow::on_readFileInfo_clicked()
         ui->textEdit->append("======= not ================ find =========");
     }
     delete info;
+}
+
+void MainWindow::on_deleteFileButton_clicked()
+{
+    readFileID = atoi(ui->lineEdit_6->text().toAscii());
+    int result = sky_sdfs_deletefile(readFileID);
+    if(result == -1){
+        char name1[100];
+        int errcode = getlasterror(result,name1,100);
+        qDebug()<<"ERROR:"<<errcode<<name1;
+    }
+    else{
+        ui->textEdit->append("FileID: " + QString::number(readFileID) + " was DELETED");
+    }
 }

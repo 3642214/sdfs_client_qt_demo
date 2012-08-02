@@ -25,6 +25,7 @@ private slots:
     void on_openButton_clicked();
     void on_upLocalFile_clicked();
     void on_readButton_clicked();
+    void setLog(QString text);
 
 private:
     Ui::MainWindow *ui;
@@ -41,6 +42,7 @@ private:
     int lineCount;
     int readFileID;
     bool uploadFile(long long fileFid, QString fileName);
+
 private slots:
     void threadOver();
     void on_test_87_1_clicked();
@@ -51,6 +53,7 @@ private slots:
     void on_readFileButton_clicked();
     void on_upLocalFile_Ex_clicked();
     void on_readFileInfo_clicked();
+    void on_deleteFileButton_clicked();
 };
 
 #endif // MAINWINDOW_H

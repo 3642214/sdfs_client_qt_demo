@@ -39,11 +39,11 @@ extern "C" {
 typedef struct fileinfo{
 	long long 	fileid;
 	char 		name[100];
-    int		    filetype;
+	int			filetype;
 	int 		filemode;
 	char	 	beginTime[23];
 	int 		owner;
-    int		    copysize;
+	int			copysize;
 	int 		blocksize;
 	long long 	link;
 	int 		blocklength;
@@ -61,6 +61,8 @@ SKY_SDFS_API(int) sky_sdfs_write( int fd,const void* buf,int nbytes);
 SKY_SDFS_API(int) sky_sdfs_read( int fd , const void* buf , int nbytes);
 SKY_SDFS_API(int) getlasterror( int fd , void* errorinfo,int len);
 SKY_SDFS_API(long long) sky_sdfs_lseek( int fd, long long offset, int whence);
+
+SKY_SDFS_API(long long) sky_sdfs_deletefile(long long fileid);
 
 SKY_SDFS_API(long long) sky_sdfs_search(int fd , char* time , int mark);
 
