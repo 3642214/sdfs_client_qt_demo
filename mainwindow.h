@@ -54,6 +54,7 @@ private slots:
     void on_upLocalFile_Ex_clicked();
     void on_readFileInfo_clicked();
     void on_deleteFileButton_clicked();
+    void textDown();
 };
 
 #endif // MAINWINDOW_H

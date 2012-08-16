@@ -9,8 +9,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>645</width>
-    <height>410</height>
+    <width>656</width>
+    <height>493</height>
    </rect>
   </property>
   <property name="sizePolicy">
@@ -396,7 +396,7 @@
           <rect>
            <x>230</x>
            <y>20</y>
-           <width>141</width>
+           <width>151</width>
            <height>27</height>
           </rect>
          </property>
@@ -421,10 +421,10 @@
           </time>
          </property>
          <property name="currentSection">
-          <enum>QDateTimeEdit::HourSection</enum>
+          <enum>QDateTimeEdit::YearSection</enum>
          </property>
          <property name="displayFormat">
-          <string>yyyy-M-d H:mm:ss.zzz</string>
+          <string>yyyy-MM-dd H:mm:ss.zzz</string>
          </property>
         </widget>
         <widget class="QLabel" name="label_9">
@@ -442,7 +442,7 @@
         </widget>
         <widget class="QLineEdit" name="selectFileCount">
          <property name="enabled">
-          <bool>true</bool>
+          <bool>false</bool>
          </property>
          <property name="geometry">
           <rect>
@@ -453,7 +453,7 @@
           </rect>
          </property>
          <property name="text">
-          <string>1</string>
+          <string/>
          </property>
          <property name="readOnly">
           <bool>true</bool>
@@ -560,6 +560,19 @@
            </property>
            <property name="text">
             <string>sky-87:1</string>
+           </property>
+          </widget>
+          <widget class="QLabel" name="label_11">
+           <property name="geometry">
+            <rect>
+             <x>74</x>
+             <y>188</y>
+             <width>31</width>
+             <height>16</height>
+            </rect>
+           </property>
+           <property name="text">
+            <string>zj14</string>
            </property>
           </widget>
          </widget>

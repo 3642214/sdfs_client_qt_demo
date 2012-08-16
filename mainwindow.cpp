@@ -33,17 +33,25 @@ MainWindow::MainWindow(QWidget *parent) :
     ui->groupBox_AutoTest->setEnabled(false);
     ui->groupBox_TestLink->setEnabled(false);
     ui->deleteFileButton->setEnabled(false);
+    connect(ui->textEdit,SIGNAL(textChanged()),this,SLOT(textDown()));
 }
 
 MainWindow::~MainWindow()
 {
     if(!threadList->isEmpty()){
+        qDebug()<<threadList->length();
         for(int i=0;i<threadList->length();i++)
         {
-            threadList->at(i)->quit();
+//            threadList->at(i)->quit();
+            threadList->at(i)->terminate();
+            qDebug()<<1;
         }
+        qDebug()<<threadList->at(0)->isRunning()<<"2";
     }
+
+    qDebug()<<"31";
     sky_sdfs_cleanup();
+    qDebug()<<"3";
     delete ui;
 }
 
@@ -155,13 +163,15 @@ bool MainWindow::uploadFile(long long fileFid,QString fileName)
                 break;
             }
             else{
-                allrst +=result;
+                allrst += result;
             }
             qDebug()<<allrst<<"/"<<file.size();
+            if(file.atEnd() and result != -1){
+               res = true;
+            }
         }
-        res = true;
+        file.close();
     }
-    file.close();
     sky_sdfs_close(fileFd);
     return res;
 }
@@ -430,11 +440,11 @@ void MainWindow::on_upLocalFile_Ex_clicked()
                 tr("Index (*.idx)"));
 
     if (!videoFile.isNull() and !idxFile.isNull()) {
-        //                QString startTime = "2012-06-29 12:12:12.012";
+//                        QString startTime = "2012-06-29 12:12:12.012";
 
         //        QDateTime qdate = QDateTime::currentDateTime();
         QString startTime = ui->dateTimeEdit->text();
-        //        qDebug()<<startTime;
+                qDebug()<<startTime;
         //        QString startTime = qdate.toString("yyyy-MM-dd hh:mm:ss.zzz");
 
         //                qDebug()<<startTime;
@@ -525,4 +535,9 @@ void MainWindow::on_deleteFileButton_clicked()
     else{
         ui->textEdit->append("FileID: " + QString::number(readFileID) + " was DELETED");
     }
+}
+
+void MainWindow::textDown()
+{
+    ui->textEdit->moveCursor(QTextCursor::End);
 }
