@@ -388,16 +388,19 @@ void MainWindow::on_readFileButton_clicked()
     info = new fileinfo;
     readFileID = atoi(ui->lineEdit_6->text().toAscii());
     int fd = sky_sdfs_openfile(readFileID,O_READ);
-    //   qDebug()<<fd;
+//       qDebug()<<fd;
     if(fd > 0){
         sky_sdfs_fileinfo(readFileID,info);
-        QFile testFile("FileId_" + QString("%1").arg(readFileID) + "__" + info->name);
+//        qDebug()<<info->name;
+        QFileInfo fileInfo(info->name);
+        QString filename = fileInfo.fileName();
+        QFile testFile("FileId_" + QString("%1").arg(readFileID) + "__" + filename);
         if(testFile.open(QIODevice::WriteOnly)){
             char buff[BUFFSIZE];
             while(TRUE){
                 int result = 0;
                 result = sky_sdfs_read(fd,buff,sizeof(buff));
-                //                      qDebug()<<"Thread "<<name<<"read= "<<result;
+//                                      qDebug()<<"read= "<<result;
                 if (result > 0){
                     qint64 writelength = testFile.write(buff,result);
                 }
