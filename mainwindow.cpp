@@ -13,7 +13,6 @@
 #include "QDateTime"
 #include "QMessageBox"
 
-#define BUFFSIZE		1024*1024
 #define BLOCKLENGTH     256*1024*1024
 #define ADVANCE_MODE 1
 #define NORMAL_MODE 0
@@ -38,6 +37,7 @@ MainWindow::MainWindow(QWidget *parent) :
 
 MainWindow::~MainWindow()
 {
+    sky_sdfs_cleanup();
     if(!threadList->isEmpty()){
         qDebug()<<threadList->length();
         for(int i=0;i<threadList->length();i++)
@@ -50,7 +50,7 @@ MainWindow::~MainWindow()
     }
 
     qDebug()<<"31";
-    sky_sdfs_cleanup();
+
     qDebug()<<"3";
     delete ui;
 }
@@ -117,7 +117,7 @@ void MainWindow::runThread()
         threadList->at(i)->start();
         qDebug()<<"thread "<<i<<" is start";
     }
-    timer->start(100);
+    timer->start(1000);
 
 }
 
@@ -151,9 +151,11 @@ bool MainWindow::uploadFile(long long fileFid,QString fileName)
     qDebug()<<"fileName= "<<fileName<<" fileFid="<<fileFid<<" fileFd="<<fileFd;
     QFile file(fileName);
     if(file.open(QIODevice::ReadOnly) and fileFid > 0 and fileFd > 0){
-        char buff[BUFFSIZE];
+//        char buff[BUFFSIZE];
+        int buffSize = atoi(ui->lineEdit_buffSize->text().toAscii());
+        char* buff = new char [buffSize*1024*1024];
         while(!file.atEnd()){
-            int size = file.read(buff,sizeof(buff));
+            int size = file.read(buff,(buffSize*1024*1024)*sizeof(char));
             //                        qDebug()<<"write start" << size;
             int result = sky_sdfs_write(fileFd,buff,size);
             //                 qDebug()<<result;
@@ -171,6 +173,7 @@ bool MainWindow::uploadFile(long long fileFid,QString fileName)
             }
         }
         file.close();
+        delete [] buff;
     }
     sky_sdfs_close(fileFd);
     return res;
@@ -200,6 +203,7 @@ void MainWindow::isThreadFinished()
         lineCount = 1;
     }
     else{
+//        qDebug()<<threadList->length();
         for(int i=0;i<threadList->length();i++)
         {
             if(threadList->at(i)->isFinished())
@@ -291,8 +295,10 @@ void MainWindow::on_test_87_2_clicked()
 {
     long long testfid = sky_sdfs_createfile(QString::number(lineCount).toAscii().constData(),BLOCKLENGTH,1);
     int testfd = sky_sdfs_openfile(testfid,O_WRITE);
-    char buff[BUFFSIZE];
-    int result = sky_sdfs_read(testfd,buff,sizeof(buff));
+//    char buff[BUFFSIZE];
+    int buffSize = atoi(ui->lineEdit_buffSize->text().toAscii());
+    char* buff = new char [buffSize*1024*1024];
+    int result = sky_sdfs_read(testfd,buff,(buffSize*1024*1024)*sizeof(char));
     qDebug()<<result<<testfd;
     if(result == -1 and testfd != -1){
         char name1[100];
@@ -307,6 +313,7 @@ void MainWindow::on_test_87_2_clicked()
         ui->textEdit->append(QString::number(lineCount) + " -----> use write mode to read file           test    FAIL");
         lineCount++;
     }
+    delete [] buff;
     //    sky_sdfs_cleanup();
 }
 
@@ -316,8 +323,10 @@ void MainWindow::on_test_87_3_clicked()
     //    sky_sdfs_init("config.ini");
     long long testfid = sky_sdfs_createfile("testfilename",BLOCKLENGTH,1);
     int testfd = sky_sdfs_openfile(testfid,O_READ);
-    char buff[BUFFSIZE];
-    int result = sky_sdfs_write(testfd,buff,sizeof(buff));
+//    char buff[BUFFSIZE];
+    int buffSize = atoi(ui->lineEdit_buffSize->text().toAscii());
+    char* buff = new char [buffSize*1024*1024];
+    int result = sky_sdfs_write(testfd,buff,(buffSize*1024*1024)*sizeof(char));
     qDebug()<<result;
     if(result == -1 and testfd != -1){
         char name1[100];
@@ -332,6 +341,7 @@ void MainWindow::on_test_87_3_clicked()
         ui->textEdit->append(QString::number(lineCount) + " -----> use read mode to write file           test    FAIL");
         lineCount++;
     }
+    delete [] buff;
 }
 
 
@@ -340,8 +350,10 @@ void MainWindow::on_test_90_1_clicked()
     long long testfid = sky_sdfs_createfile("testfilename",BLOCKLENGTH,1);
     int testfd = sky_sdfs_openfile(testfid,O_WRITE);
     sky_sdfs_close(testfd);
-    char buff[BUFFSIZE];
-    int result = sky_sdfs_write(testfd,buff,sizeof(buff));
+//    char buff[BUFFSIZE];
+    int buffSize = atoi(ui->lineEdit_buffSize->text().toAscii());
+    char* buff = new char [buffSize*1024*1024];
+    int result = sky_sdfs_write(testfd,buff,(buffSize*1024*1024)*sizeof(char));
     qDebug()<<result;
     if(result == -1 and testfd != -1){
         char name1[100];
@@ -356,6 +368,7 @@ void MainWindow::on_test_90_1_clicked()
         ui->textEdit->append(QString::number(lineCount) + " -----> write to the closed file           test    FAIL");
         lineCount++;
     }
+    delete [] buff;
     //    sky_sdfs_cleanup();
 }
 
@@ -365,8 +378,10 @@ void MainWindow::on_test_90_2_clicked()
     long long testfid = sky_sdfs_createfile("testfilename",BLOCKLENGTH,1);
     int testfd = sky_sdfs_openfile(testfid,O_READ);
     sky_sdfs_close(testfd);
-    char buff[BUFFSIZE];
-    int result = sky_sdfs_read(testfd,buff,sizeof(buff));
+//    char buff[BUFFSIZE];
+    int buffSize = atoi(ui->lineEdit_buffSize->text().toAscii());
+    char* buff = new char [buffSize*1024*1024];
+    int result = sky_sdfs_read(testfd,buff,(buffSize*1024*1024)*sizeof(char));
     qDebug()<<result;
     if(result == -1 and testfd != -1){
         char name1[100];
@@ -381,6 +396,7 @@ void MainWindow::on_test_90_2_clicked()
             lineCount++;
         }
     }
+    delete [] buff;
 }
 
 void MainWindow::on_readFileButton_clicked()
@@ -396,10 +412,12 @@ void MainWindow::on_readFileButton_clicked()
         QString filename = fileInfo.fileName();
         QFile testFile("FileId_" + QString("%1").arg(readFileID) + "__" + filename);
         if(testFile.open(QIODevice::WriteOnly)){
-            char buff[BUFFSIZE];
+            int buffSize = atoi(ui->lineEdit_buffSize->text().toAscii());
+//            qDebug()<<"buffSize = "<<buffSize;
+            char* buff = new char [buffSize*1024*1024];
             while(TRUE){
                 int result = 0;
-                result = sky_sdfs_read(fd,buff,sizeof(buff));
+                result = sky_sdfs_read(fd,buff,(buffSize*1024*1024)*sizeof(char));
 //                                      qDebug()<<"read= "<<result;
                 if (result > 0){
                     qint64 writelength = testFile.write(buff,result);
@@ -411,6 +429,7 @@ void MainWindow::on_readFileButton_clicked()
                         break;
                     }
                     else{
+//                        qDebug()<<result;
                         ui->textEdit->append(QString::number(lineCount)+ " ----->" + testFile.fileName() + "  file download OK");
                         lineCount++;
                         break;
@@ -418,6 +437,7 @@ void MainWindow::on_readFileButton_clicked()
 
                 }
             }
+             delete [] buff;
             testFile.close();
         }
     }

@@ -53,6 +53,8 @@ void workThread::run()
         break;
     }
     }
+    sky_sdfs_close(fd);
+    qDebug()<<"Thread "<<name<<"fd= "<<fd<<" closed";
 }
 
 void workThread::testCreate()
@@ -228,20 +230,24 @@ void workThread::testUpload()
                                                     testinfo1->copysize);
             if(fileFid >0){
                 if(uploadFile(fileFid,testinfo1->filePath.at(j))){
-                    emit changeText("count ="
+                    emit changeText("Count ="
                                     + QString::number(i)
-                                    + "  upload ok . fileID = "
+                                    + " Thread ="
+                                    + name
+                                    + "  Upload ok . FileID = "
                                     + QString::number(fileFid)
-                                    + "  fileName = "
+                                    + "  FileName = "
                                     +fileInfo.fileName());
                     qDebug()<<"count = "<<i<<" filelist.at="<<j<<fileInfo.fileName()<<"  upload ok";
                 }
                 else{
-                    emit changeText("count ="
+                    emit changeText("Count ="
                                     + QString::number(i)
-                                    + "  upload fail: "
+                                    + " Thread ="
+                                    + name
+                                    + "  Upload Fail: "
                                     + errorCode
-                                    + "  fileID = "
+                                    + "  FileID = "
                                     + QString::number(fileFid));
                     qDebug()<<"count = "<<i<<" filelist.at="<<j<<fileInfo.fileName()<<"  upload fail";
                 }
@@ -263,11 +269,13 @@ bool workThread::uploadFile(long long fileFid, QString fileName)
     bool res = false;
     QFile file(fileName);
     int fileFd = sky_sdfs_openfile(fileFid,O_WRITE);
+    qDebug()<<"~~~~~~id= "<<fileFid<<"  FD= "<<fileFd;
     if(file.open(QIODevice::ReadOnly) and fileFid > 0 and fileFd > 0){
         char buff[BUFFSIZE];
         while(!file.atEnd()){
             int size = file.read(buff,sizeof(buff));
             int result = sky_sdfs_write(fileFd,buff,size);
+            qDebug()<<"~~~~~~~~write result= "<<result;
             if(result == -1){
                 qDebug()<<"Thread "<<name<<"ERROR:"<<getlasterror(fileFd,errorCode,100)<<errorCode;
                 break;
@@ -277,12 +285,10 @@ bool workThread::uploadFile(long long fileFid, QString fileName)
             }
         }
         file.close();
-//        sky_sdfs_close(fileFd);
+        sky_sdfs_close(fileFd);
     }
-//    while(true){
-    qDebug()<<res;
+//    qDebug()<<res;
     return res;
-//    }
 }
 
 
