@@ -410,15 +410,40 @@ void MainWindow::on_readFileButton_clicked()
 //        qDebug()<<info->name;
         QFileInfo fileInfo(info->name);
         QString filename = fileInfo.fileName();
-        QFile testFile("FileId_" + QString("%1").arg(readFileID) + "__" + filename);
+        long long offset = ui->offset_Edit->text().toLongLong();
+        int readSize = ui->readSize_edit->text().toInt();
+        QString testFileName="";
+        if(offset != 0){
+            testFileName = "offset_" + QString("%1").arg(offset) + "-";
+        }
+        if(readSize != 0){
+            testFileName = testFileName + "readSize_" + QString("%1").arg(readSize) + "-";
+        }
+
+        QFile testFile("FileId_" + QString("%1").arg(readFileID) + "-" + testFileName + filename);
+        sky_sdfs_lseek(fd,offset,SEEK_SET);
         if(testFile.open(QIODevice::WriteOnly)){
             int buffSize = atoi(ui->lineEdit_buffSize->text().toAscii());
-//            qDebug()<<"buffSize = "<<buffSize;
+            if(buffSize > readSize){
+                buffSize = readSize;
+            }
+            qDebug()<<"buffSize"<<buffSize;
             char* buff = new char [buffSize*1024*1024];
             while(TRUE){
                 int result = 0;
-                result = sky_sdfs_read(fd,buff,(buffSize*1024*1024)*sizeof(char));
-//                                      qDebug()<<"read= "<<result;
+                if(readSize >= buffSize){
+                    result = sky_sdfs_read(fd,buff,(buffSize*1024*1024)*sizeof(char));
+                    qDebug()<<"read1= "<<result;
+                }
+                else{
+                    if(readSize <= 0){
+                        ui->textEdit->append(QString::number(lineCount)+ " ----->" + testFile.fileName() + "  file download OK");
+                        lineCount++;
+                        break;
+                    }
+                    result = sky_sdfs_read(fd,buff,(readSize*1024*1024)*sizeof(char));
+                    qDebug()<<"read2= "<<result;
+                }
                 if (result > 0){
                     qint64 writelength = testFile.write(buff,result);
                 }
@@ -436,6 +461,8 @@ void MainWindow::on_readFileButton_clicked()
                     }
 
                 }
+                readSize = readSize - buffSize;
+                qDebug()<<"readSizeEND= "<<readSize;
             }
              delete [] buff;
             testFile.close();
