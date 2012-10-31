@@ -38,7 +38,7 @@ private:
     void threadOver(QString name);
     QTimer *timer;
     void btnOn();
-    void btnOff();
+    void btnOff();   
     int lineCount;
     int readFileID;
     bool uploadFile(long long fileFid, QString fileName);
@@ -55,6 +55,9 @@ private slots:
     void on_readFileInfo_clicked();
     void on_deleteFileButton_clicked();
     void textDown();
+    void changeValue();
+    void on_lockFileButton_clicked();
+    void on_unLockFileButton_clicked();
 };
 
 #endif // MAINWINDOW_H

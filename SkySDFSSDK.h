@@ -50,6 +50,7 @@ typedef struct fileinfo{
 }fileinfo;
 
 SKY_SDFS_API(int) sky_sdfs_init(char* path);
+SKY_SDFS_API(int) sky_sdfs_init_ex(char* path,int paras,...); //sky_sdfs_init_ex("config.ini",1,"cnips","192.168.8.101");
 SKY_SDFS_API(int) sky_sdfs_cleanup(void);
 
 SKY_SDFS_API(long long) sky_sdfs_createfile(const char* filename , int blocklength , int copysize);
@@ -63,10 +64,14 @@ SKY_SDFS_API(int) getlasterror( int fd , void* errorinfo,int len);
 SKY_SDFS_API(long long) sky_sdfs_lseek( int fd, long long offset, int whence);
 
 SKY_SDFS_API(long long) sky_sdfs_deletefile(long long fileid);
+SKY_SDFS_API(int) sky_sdfs_lockfile(long long fileid);
+SKY_SDFS_API(int) sky_sdfs_unlockfile(long long fileid);
 
 SKY_SDFS_API(long long) sky_sdfs_search(int fd , char* time , int mark);
 
 SKY_SDFS_API(int) sky_sdfs_fileinfo( long long fileid , fileinfo* info);
+
+SKY_SDFS_API(int) sky_sdfs_sync(int fd);
 
 #ifdef   __cplusplus 
 }

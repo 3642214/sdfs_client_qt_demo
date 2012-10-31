@@ -6,20 +6,28 @@
 #define T_WRITE			3
 #define T_READ			4
 #define T_UPLOAD        5
+#define T_UPLOAD_EX     6
+#define T_DOWNLOAD      7
 
 #include <QThread>
 #include <QFile>
 
 typedef struct testinfo{
-    int        testFunc;
+    int     testFunc;
     QString fileName;
+    QString idxName;
+    QString startTime;
+    long long fileID;
+    int     offset;
+    int     downloadSize;
+    bool    downloadAll;
     int		copysize;
-    int 		blocksize;
-    int 		blocklength;
-    long      buffsize;
-    long      filesize;
-    int        openMode;
-    QString      result;
+    int 	blocksize;
+    int 	blocklength;
+    long    buffsize;
+    long    filesize;
+    int     openMode;
+    QString result;
     QList<QString>  filePath;
     int       count;
     }testinfo;
@@ -47,6 +55,8 @@ private:
     void testWrite();
     void testRead();
     void testUpload();
+    void testUpload_ex();
+    void testDownload();
     bool uploadFile(long long fileFid, QString fileName);
     void close();
 
