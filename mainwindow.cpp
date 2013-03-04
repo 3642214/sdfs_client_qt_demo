@@ -531,3 +531,20 @@ void MainWindow::on_unLockFileButton_clicked()
         ui->textEdit->append("UNLOCK FileID: " + QString::number(readFileID) + " OK ");
     }
 }
+
+void MainWindow::on_serachButton_clicked()
+{
+    QString time = ui->dateTimeEdit->text();
+    int fileID = atoi(ui->lineEdit_6->text().toAscii());
+    int fd = sky_sdfs_openfile(fileID,O_READ);
+    int result = sky_sdfs_search(fd,time.toLatin1().data(),STARTTIME);
+//    qDebug()<<result;
+    if(result == -1){
+        char name1[100];
+        int errcode = getlasterror(result,name1,100);
+        ui->textEdit->append("TimeToOffset: " + QString::number(fileID) + " ERRORCODE:" + QString::number(errcode) +" " +name1);
+    }
+    else{
+        ui->textEdit->append("Time:" + time + " To Offset:" + QString::number(result));
+    }
+}

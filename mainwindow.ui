@@ -383,7 +383,7 @@
         <widget class="QPushButton" name="upLocalFile_Ex">
          <property name="geometry">
           <rect>
-           <x>310</x>
+           <x>360</x>
            <y>65</y>
            <width>101</width>
            <height>27</height>
@@ -611,6 +611,19 @@
          </property>
          <property name="text">
           <string>ALL</string>
+         </property>
+        </widget>
+        <widget class="QPushButton" name="serachButton">
+         <property name="geometry">
+          <rect>
+           <x>300</x>
+           <y>65</y>
+           <width>51</width>
+           <height>27</height>
+          </rect>
+         </property>
+         <property name="text">
+          <string>T2O</string>
          </property>
         </widget>
        </widget>

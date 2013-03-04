@@ -58,6 +58,7 @@ private slots:
     void changeValue();
     void on_lockFileButton_clicked();
     void on_unLockFileButton_clicked();
+    void on_serachButton_clicked();
 };
 
 #endif // MAINWINDOW_H
