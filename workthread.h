@@ -11,6 +11,7 @@
 
 #include <QThread>
 #include <QFile>
+#include <QTime>
 
 typedef struct testinfo{
     int     testFunc;
@@ -73,6 +74,8 @@ private:
 
 public:
     QString name;
+    QTime time;
+
 };
 
 #endif // WORKTHREAD_H

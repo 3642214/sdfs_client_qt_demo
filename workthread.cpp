@@ -72,6 +72,7 @@ void workThread::run()
 void workThread::testCreate()
 {
     this->init();
+    time.start();
     fileID = sky_sdfs_createfile(name.toAscii().constData(),testinfo1->blocklength*1024*1024,testinfo1->copysize);
     qDebug()<<"Thread"<<name<<":"<<"fileID="<<fileID<<";blocklength="<<testinfo1->blocklength<<";copysize="<<testinfo1->copysize;
     if(fileID > 0){
@@ -150,6 +151,9 @@ void workThread::testWrite()
             }
         }
     }
+    int timeDiff = time.elapsed();
+    float uploadSpeed = testinfo1->filesize / ( timeDiff / 1000.0 );
+    emit changeText("used time :" + QString::number(timeDiff) + " ms , upload speed :" + QString::number(uploadSpeed) + " M/s");
     emit changeText(name + "    testWrite   true  fileID = " + QString::number(fileID));
     //    testinfo1->result = name + "      testWrite   ture";
     qDebug()<<"Thread"<<name<<":"<<"Write ------------------------->succ";
