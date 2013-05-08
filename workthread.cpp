@@ -437,17 +437,17 @@ bool workThread::uploadFile(long long fileFid, QString fileName)
 
     bool res = false;
     QFile file(fileName);
-    int fileFd = sky_sdfs_openfile(fileFid,O_WRITE);
-    qDebug()<<"~~~~~~id= "<<fileFid<<"  FD= "<<fileFd;
-    if(file.open(QIODevice::ReadOnly) and fileFid > 0 and fileFd > 0){
+    fd = sky_sdfs_openfile(fileFid,O_WRITE);
+    qDebug()<<"~~~~~~id= "<<fileFid<<"  FD= "<<fd;
+    if(file.open(QIODevice::ReadOnly) and fileFid > 0 and fd > 0){
 //        char buff[BUFFSIZE];
         char* buff = new char [testinfo1->buffsize*1024*1024];
         while(!file.atEnd()){
             int size = file.read(buff,(testinfo1->buffsize*1024*1024)*sizeof(char));
-            int result = sky_sdfs_write(fileFd,buff,size);
+            int result = sky_sdfs_write(fd,buff,size);
             qDebug()<<"~~~~~~~~write result= "<<result;
             if(result == -1){
-                qDebug()<<"Thread "<<name<<"ERROR:"<<getlasterror(fileFd,errorCode,100)<<errorCode;
+                qDebug()<<"Thread "<<name<<"ERROR:"<<getlasterror(fd,errorCode,100)<<errorCode;
                 break;
             }
             if(file.atEnd() and result != -1){
@@ -455,7 +455,7 @@ bool workThread::uploadFile(long long fileFid, QString fileName)
             }
         }
         file.close();
-        sky_sdfs_close(fileFd);
+        sky_sdfs_close(fd);
         delete [] buff;
     }
 //    qDebug()<<res;

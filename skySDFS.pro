@@ -10,7 +10,7 @@ TARGET = skySDFS
 TEMPLATE = app
 
 win32:LIBS += -L$$PWD\ -lskyFS-client-c
-else:unix: LIBS += -L$$PWD/ -lclient
+else:unix:LIBS += -L$$PWD/ -lclient
 
 SOURCES += main.cpp\
         mainwindow.cpp \

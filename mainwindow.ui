@@ -455,7 +455,7 @@
           <enum>QDateTimeEdit::YearSection</enum>
          </property>
          <property name="displayFormat">
-          <string>yyyy-MM-dd H:mm:ss.zzz</string>
+          <string>yyyy-MM-dd HH:mm:ss.zzz</string>
          </property>
         </widget>
         <widget class="QLabel" name="label_9">
