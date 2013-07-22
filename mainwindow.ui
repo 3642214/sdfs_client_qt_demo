@@ -335,7 +335,7 @@
           <enum>Qt::LeftToRight</enum>
          </property>
          <property name="text">
-          <string>30139</string>
+          <string>2305843009215136033</string>
          </property>
          <property name="alignment">
           <set>Qt::AlignCenter</set>
@@ -344,9 +344,9 @@
         <widget class="QPushButton" name="upLocalFile">
          <property name="geometry">
           <rect>
-           <x>480</x>
+           <x>520</x>
            <y>65</y>
-           <width>101</width>
+           <width>81</width>
            <height>27</height>
           </rect>
          </property>
@@ -624,6 +624,19 @@
          </property>
          <property name="text">
           <string>T2O</string>
+         </property>
+        </widget>
+        <widget class="QPushButton" name="upLittleFileButton">
+         <property name="geometry">
+          <rect>
+           <x>465</x>
+           <y>65</y>
+           <width>51</width>
+           <height>27</height>
+          </rect>
+         </property>
+         <property name="text">
+          <string>little</string>
          </property>
         </widget>
        </widget>

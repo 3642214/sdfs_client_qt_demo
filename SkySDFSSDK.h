@@ -1,3 +1,4 @@
+#include <stdio.h>
 #ifndef SKY_SDFS_SDK_H
 #define SKY_SDFS_SDK_H
 
@@ -32,6 +33,7 @@
 #define STARTTIME		0
 #define ENDTIME			1
 
+
 #ifdef   __cplusplus 
 extern "C" {
 #endif
@@ -49,17 +51,23 @@ typedef struct fileinfo{
 	int 		blocklength;
 }fileinfo;
 
-SKY_SDFS_API(int) sky_sdfs_init(char* path);
-SKY_SDFS_API(int) sky_sdfs_init_ex(char* path,int paras,...); //sky_sdfs_init_ex("config.ini",1,"cnips","192.168.8.101");
+SKY_SDFS_API(int) sky_sdfs_init(const char* path);
+
+SKY_SDFS_API(int) sky_sdfs_init_ex(const char* path,int paras,...); //sky_sdfs_init_ex("config.ini",2,"cnips","192.168.8.101","cnport",29001);
+SKY_SDFS_API(int) sky_sdfs_init_list(const char* path,int paras , va_list args);
 SKY_SDFS_API(int) sky_sdfs_cleanup(void);
 
 SKY_SDFS_API(long long) sky_sdfs_createfile(const char* filename , int blocklength , int copysize);
-SKY_SDFS_API(long long) sky_sdfs_createfile_ex(const char* filename , int blocklength , int copysize , int filetype , char* StartTime , long long lfileid);
+SKY_SDFS_API(long long) sky_sdfs_createfile_ex(const char* filename , int blocklength , int copysize , int filetype , const char* StartTime , long long lfileid);
+SKY_SDFS_API(long long) sky_sdfs_create_littlefile(const char* filename , int copysize);
 
 SKY_SDFS_API(int) sky_sdfs_openfile(long long fileid , int mode);
+SKY_SDFS_API(int) sky_sdfs_open_littlefile(long long fileid);
 SKY_SDFS_API(void) sky_sdfs_close( int fd);
 SKY_SDFS_API(int) sky_sdfs_write( int fd,const void* buf,int nbytes);
+SKY_SDFS_API(int) sky_sdfs_write_littlefile( int fd,const void* buf,int nbytes);
 SKY_SDFS_API(int) sky_sdfs_read( int fd , const void* buf , int nbytes);
+SKY_SDFS_API(int) sky_sdfs_read_littlefile( int fd , const void* buf);
 SKY_SDFS_API(int) getlasterror( int fd , void* errorinfo,int len);
 SKY_SDFS_API(long long) sky_sdfs_lseek( int fd, long long offset, int whence);
 
@@ -67,7 +75,7 @@ SKY_SDFS_API(long long) sky_sdfs_deletefile(long long fileid);
 SKY_SDFS_API(int) sky_sdfs_lockfile(long long fileid);
 SKY_SDFS_API(int) sky_sdfs_unlockfile(long long fileid);
 
-SKY_SDFS_API(long long) sky_sdfs_search(int fd , char* time , int mark);
+SKY_SDFS_API(long long) sky_sdfs_search(int fd , const char* time , int mark);
 
 SKY_SDFS_API(int) sky_sdfs_fileinfo( long long fileid , fileinfo* info);
 

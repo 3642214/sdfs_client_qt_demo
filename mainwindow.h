@@ -40,7 +40,7 @@ private:
     void btnOn();
     void btnOff();   
     int lineCount;
-    int readFileID;
+    long long readFileID;
     bool uploadFile(long long fileFid, QString fileName);
 
 private slots:
@@ -59,6 +59,7 @@ private slots:
     void on_lockFileButton_clicked();
     void on_unLockFileButton_clicked();
     void on_serachButton_clicked();
+    void on_upLittleFileButton_clicked();
 };
 
 #endif // MAINWINDOW_H

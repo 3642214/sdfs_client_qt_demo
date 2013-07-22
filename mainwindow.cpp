@@ -29,9 +29,6 @@ MainWindow::MainWindow(QWidget *parent) :
     ui->setupUi(this);
     ui->textEdit->ensureCursorVisible();
     sky_sdfs_init("config.ini");
-    ui->groupBox_AutoTest->setEnabled(false);
-    ui->groupBox_TestLink->setEnabled(false);
-    ui->deleteFileButton->setEnabled(false);
     connect(ui->textEdit,SIGNAL(textChanged()),this,SLOT(textDown()));
     connect(ui->checkBox,SIGNAL(clicked()),this,SLOT(changeValue()));
 }
@@ -58,6 +55,12 @@ void MainWindow::setMode(int Mode)
         ui->groupBox_AutoTest->setEnabled(true);
         ui->groupBox_TestLink->setEnabled(true);
         ui->deleteFileButton->setEnabled(true);
+    }
+    else
+    {
+        ui->groupBox_AutoTest->setEnabled(false);
+        ui->groupBox_TestLink->setEnabled(false);
+        ui->deleteFileButton->setEnabled(false);
     }
 }
 
@@ -101,7 +104,7 @@ void MainWindow::createThread()
     {
         workThread *thread = new workThread(QString::number(i),test);
         threadList->push_back(thread);
-        connect(thread,SIGNAL(finished()),this,SLOT(threadOver()));
+//        connect(thread,SIGNAL(finished()),this,SLOT(threadOver()));
         connect(thread,SIGNAL(changeText(QString)),this,SLOT(setLog(QString)));
         //        qDebug()<<i;
     }
@@ -217,6 +220,7 @@ void MainWindow::isThreadFinished()
             if(threadList->at(i)->isFinished())
             {
                 //                threadOver(threadList->at(i)->name);
+                threadList->at(i)->deleteLater();
                 threadList->removeAt(i);
                 //                qDebug()<<"xiancehgns"<<threadList->length();
             }
@@ -410,10 +414,15 @@ void MainWindow::on_test_90_2_clicked()
 void MainWindow::on_readFileButton_clicked()
 {
     changeTestinfo();
-    test->fileID = atoi(ui->lineEdit_6->text().toAscii());
-    test->downloadSize = atoi(ui->readSize_edit->text().toAscii());
-    test->offset = atoi(ui->offset_Edit->text().toAscii());
-    test->testFunc = T_DOWNLOAD;
+    test->fileID = ui->lineEdit_6->text().toLongLong();
+    if(ui->lineEdit_6->text().length() >= 19){
+        test->testFunc = T_DOWNLOAD_LFILE;
+    }
+    else{
+        test->downloadSize = atoi(ui->readSize_edit->text().toAscii());
+        test->offset = atoi(ui->offset_Edit->text().toAscii());
+        test->testFunc = T_DOWNLOAD;
+    }
     createThread();
     runThread();
 }
@@ -446,7 +455,7 @@ void MainWindow::on_upLocalFile_Ex_clicked()
 void MainWindow::on_readFileInfo_clicked()
 {
     info = new fileinfo;
-    readFileID = atoi(ui->lineEdit_6->text().toAscii());
+    readFileID = ui->lineEdit_6->text().toLongLong();
     int res = sky_sdfs_fileinfo(readFileID,info);
     qDebug()<<res
            <<info->beginTime
@@ -484,7 +493,7 @@ void MainWindow::on_readFileInfo_clicked()
 
 void MainWindow::on_deleteFileButton_clicked()
 {
-    readFileID = atoi(ui->lineEdit_6->text().toAscii());
+    readFileID = ui->lineEdit_6->text().toLongLong();
     int result = sky_sdfs_deletefile(readFileID);
     if(result == -1){
         char name1[100];
@@ -504,7 +513,7 @@ void MainWindow::textDown()
 
 void MainWindow::on_lockFileButton_clicked()
 {
-    readFileID = atoi(ui->lineEdit_6->text().toAscii());
+    readFileID = ui->lineEdit_6->text().toLongLong();
     int result = sky_sdfs_lockfile(readFileID);
     if(result == -1){
         char name1[100];
@@ -519,7 +528,7 @@ void MainWindow::on_lockFileButton_clicked()
 
 void MainWindow::on_unLockFileButton_clicked()
 {
-    readFileID = atoi(ui->lineEdit_6->text().toAscii());
+    readFileID = ui->lineEdit_6->text().toLongLong();
     int result = sky_sdfs_unlockfile(readFileID);
     if(result == -1){
         char name1[100];
@@ -546,5 +555,22 @@ void MainWindow::on_serachButton_clicked()
     }
     else{
         ui->textEdit->append("Time:" + time + " To Offset:" + QString::number(result));
+    }
+}
+
+void MainWindow::on_upLittleFileButton_clicked()
+{
+    QList<QString> fileList = QFileDialog::getOpenFileNames(
+                this,
+                QDir::currentPath());
+
+    if (!fileList.isEmpty()) {
+        changeTestinfo();
+        ui->selectFileCount->setText(QString::number(fileList.length()));
+        test->filePath = fileList;
+        test->count = ui->uploadCount->text().toInt();
+        test->testFunc = T_UPLOAD_LFILE;
+        createThread();
+        runThread();
     }
 }
