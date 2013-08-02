@@ -29,6 +29,7 @@
 
 #define NORMAL_FILE		0
 #define INDEX_FILE		1
+#define LITTLE_FILE		2
 
 #define STARTTIME		0
 #define ENDTIME			1
@@ -80,6 +81,7 @@ SKY_SDFS_API(long long) sky_sdfs_search(int fd , const char* time , int mark);
 SKY_SDFS_API(int) sky_sdfs_fileinfo( long long fileid , fileinfo* info);
 
 SKY_SDFS_API(int) sky_sdfs_sync(int fd);
+SKY_SDFS_API(int) sky_sdfs_close_pipe(void);
 
 #ifdef   __cplusplus 
 }

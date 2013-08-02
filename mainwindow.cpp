@@ -118,7 +118,7 @@ void MainWindow::runThread()
         threadList->at(i)->start();
         qDebug()<<"thread "<<i<<" is start";
     }
-    timer->start(1000);
+    timer->start(100);
 
 }
 
@@ -220,6 +220,7 @@ void MainWindow::isThreadFinished()
             if(threadList->at(i)->isFinished())
             {
                 //                threadOver(threadList->at(i)->name);
+//                disconnect(threadList->at(i),SIGNAL(changeText(QString)),this,SLOT(setLog(QString)));
                 threadList->at(i)->deleteLater();
                 threadList->removeAt(i);
                 //                qDebug()<<"xiancehgns"<<threadList->length();
@@ -573,4 +574,10 @@ void MainWindow::on_upLittleFileButton_clicked()
         createThread();
         runThread();
     }
+}
+
+void MainWindow::on_pushButton_clicked()
+{
+    sky_sdfs_close_pipe();
+//    sky_sdfs_cleanup();
 }

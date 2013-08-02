@@ -60,6 +60,7 @@ private slots:
     void on_unLockFileButton_clicked();
     void on_serachButton_clicked();
     void on_upLittleFileButton_clicked();
+    void on_pushButton_clicked();
 };
 
 #endif // MAINWINDOW_H
