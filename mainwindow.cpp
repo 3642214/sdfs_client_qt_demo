@@ -416,7 +416,7 @@ void MainWindow::on_readFileButton_clicked()
 {
     changeTestinfo();
     test->fileID = ui->lineEdit_6->text().toLongLong();
-    if(ui->lineEdit_6->text().length() >= 19){
+    if(test->fileID>>61 == 1){
         test->testFunc = T_DOWNLOAD_LFILE;
     }
     else{

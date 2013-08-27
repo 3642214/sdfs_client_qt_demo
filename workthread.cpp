@@ -491,7 +491,6 @@ void workThread::testUploadLFile()
 
 void workThread::testDownloadLFile()
 {
-    fileinfo* info = new fileinfo;
     long long readFileID = testinfo1->fileID;
     fd = sky_sdfs_open_littlefile(readFileID);
 //    qDebug()<<"fd="<<fd;
@@ -501,47 +500,32 @@ void workThread::testDownloadLFile()
         if(testFile.open(QIODevice::WriteOnly))
         {
             char* buff = new char [1/**1024*/*1024];
-            while(TRUE)
-            {
-                int result = sky_sdfs_read_littlefile(fd,buff);
-                if(result == -1){
-                    char name1[100];
-                    int errorCode = getlasterror(fd,name1,100);
-                    qDebug()<<"ERROR:"<<errorCode<<name1;
-                    emit changeText("Thread ="
-                                    + name
-                                    + " FileID = "
-                                    + QString::number(readFileID)
-                                    + " ERROR:"
-                                    + QString::number(errorCode)
-                                    + name1
-                                    );
-                break;
-                }
-                else
-                {
-                    testFile.write(buff,result);
-                    emit changeText("Thread ="
-                                    + name
-                                    + " Download ok. fileName: "
-                                    + testFile.fileName());
-                    break;
-                }
+            int result = sky_sdfs_read_littlefile(fd,buff);
+            if(result != -1){
+                testFile.write(buff,result);
+                emit changeText("Thread ="
+                                + name
+                                + " Download ok. fileName: "
+                                + testFile.fileName());
+                testFile.close();
             }
-        delete [] buff;
-        testFile.close();
+            else{
+                char name1[100];
+                int errorCode = getlasterror(fd,name1,100);
+                qDebug()<<"ERROR:"<<errorCode<<name1;
+                emit changeText("Thread ="
+                                + name
+                                + " FileID = "
+                                + QString::number(readFileID)
+                                + " ERROR:"
+                                + QString::number(errorCode)
+                                + name1);
+                testFile.close();
+                QFile::remove(testFile.fileName());
+            }
+            delete [] buff;
         }
     }
-    else{
-        emit changeText("Thread ="
-                        + name
-                        + "  Download FAIL. FileID= "
-                        + QString::number(readFileID)
-                        + " file not find");
-    }
-
-    delete info;
-//    qDebug()<<"Thread "<<name<<" fd= "<<fd;
 }
 
 bool workThread::uploadFile(long long fileFid, QString fileName)

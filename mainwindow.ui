@@ -642,14 +642,14 @@
         <widget class="QPushButton" name="pushButton">
          <property name="geometry">
           <rect>
-           <x>230</x>
+           <x>220</x>
            <y>10</y>
            <width>75</width>
            <height>23</height>
           </rect>
          </property>
          <property name="text">
-          <string>PushButton</string>
+          <string>close_pipe</string>
          </property>
         </widget>
        </widget>
