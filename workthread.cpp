@@ -452,10 +452,12 @@ void workThread::testUploadLFile()
         for(int j = 0;j<testinfo1->filePath.length();j++){
             QFile file(testinfo1->filePath.at(j));
             QFileInfo fileInfo(file);
-            long long fileFid = sky_sdfs_create_littlefile(fileInfo.fileName().toUtf8().constData(),
-                                                    testinfo1->copysize);
+            long long fileFid = sky_sdfs_upload_littlefile(fileInfo.fileName().toUtf8().constData(),
+                                                           testinfo1->filePath.at(j).toUtf8().constData(),
+                                                    testinfo1->copysize,
+                                                           testinfo1->startTime.toAscii().data());
             if(fileFid >0){
-                if(uploadFile(fileFid,testinfo1->filePath.at(j))){
+//                if(uploadFile(fileFid,testinfo1->filePath.at(j))){
                     emit changeText("Count ="
                                     + QString::number(i)
                                     + " Thread ="
@@ -465,18 +467,18 @@ void workThread::testUploadLFile()
                                     + "  FileName = "
                                     +fileInfo.fileName());
                     qDebug()<<"count = "<<i<<" filelist.at="<<j<<fileInfo.fileName()<<"  upload ok";
-                }
-                else{
-                    emit changeText("Count ="
-                                    + QString::number(i)
-                                    + " Thread ="
-                                    + name
-                                    + "  Upload Fail: "
-                                    + errorCode
-                                    + "  FileID = "
-                                    + QString::number(fileFid));
-                    qDebug()<<"count = "<<i<<" filelist.at="<<j<<fileInfo.fileName()<<"  upload fail";
-                }
+//                }
+//                else{
+//                    emit changeText("Count ="
+//                                    + QString::number(i)
+//                                    + " Thread ="
+//                                    + name
+//                                    + "  Upload Fail: "
+//                                    + errorCode
+//                                    + "  FileID = "
+//                                    + QString::number(fileFid));
+//                    qDebug()<<"count = "<<i<<" filelist.at="<<j<<fileInfo.fileName()<<"  upload fail";
+//                }
             }
             else{
                 qDebug()<<"Thread "<<name<<"ERROR:"<<getlasterror(-1,errorCode,100)<<errorCode;
@@ -538,7 +540,7 @@ bool workThread::uploadFile(long long fileFid, QString fileName)
     {
     case T_UPLOAD_LFILE:
     {
-        fd = sky_sdfs_open_littlefile(fileFid);
+//        fd = sky_sdfs_open_littlefile(fileFid);
 
         break;
     }
@@ -559,7 +561,7 @@ bool workThread::uploadFile(long long fileFid, QString fileName)
             {
             case T_UPLOAD_LFILE:
             {
-                result = sky_sdfs_write_littlefile(fd,buff,size);
+//                result = sky_sdfs_write_littlefile(fd,buff,size);
                 break;
             }
             default:

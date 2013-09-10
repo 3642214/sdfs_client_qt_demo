@@ -61,6 +61,7 @@ private slots:
     void on_serachButton_clicked();
     void on_upLittleFileButton_clicked();
     void on_pushButton_clicked();
+    void on_test_137_clicked();
 };
 
 #endif // MAINWINDOW_H

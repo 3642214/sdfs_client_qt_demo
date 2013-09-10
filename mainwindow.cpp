@@ -571,6 +571,7 @@ void MainWindow::on_upLittleFileButton_clicked()
         test->filePath = fileList;
         test->count = ui->uploadCount->text().toInt();
         test->testFunc = T_UPLOAD_LFILE;
+        test->startTime = ui->dateTimeEdit->text();
         createThread();
         runThread();
     }
@@ -580,4 +581,9 @@ void MainWindow::on_pushButton_clicked()
 {
     sky_sdfs_close_pipe();
 //    sky_sdfs_cleanup();
+}
+
+void MainWindow::on_test_137_clicked()
+{
+
 }

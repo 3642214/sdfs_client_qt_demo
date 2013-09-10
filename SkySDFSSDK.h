@@ -60,13 +60,14 @@ SKY_SDFS_API(int) sky_sdfs_cleanup(void);
 
 SKY_SDFS_API(long long) sky_sdfs_createfile(const char* filename , int blocklength , int copysize);
 SKY_SDFS_API(long long) sky_sdfs_createfile_ex(const char* filename , int blocklength , int copysize , int filetype , const char* StartTime , long long lfileid);
-SKY_SDFS_API(long long) sky_sdfs_create_littlefile(const char* filename , int copysize);
+
+SKY_SDFS_API(long long) sky_sdfs_upload_littlefile(const char* filename, const char* filepath, int copysize, const char* StartTime);
 
 SKY_SDFS_API(int) sky_sdfs_openfile(long long fileid , int mode);
 SKY_SDFS_API(int) sky_sdfs_open_littlefile(long long fileid);
+
 SKY_SDFS_API(void) sky_sdfs_close( int fd);
 SKY_SDFS_API(int) sky_sdfs_write( int fd,const void* buf,int nbytes);
-SKY_SDFS_API(int) sky_sdfs_write_littlefile( int fd,const void* buf,int nbytes);
 SKY_SDFS_API(int) sky_sdfs_read( int fd , const void* buf , int nbytes);
 SKY_SDFS_API(int) sky_sdfs_read_littlefile( int fd , const void* buf);
 SKY_SDFS_API(int) getlasterror( int fd , void* errorinfo,int len);

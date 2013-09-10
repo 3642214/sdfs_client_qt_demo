@@ -684,7 +684,7 @@
            <property name="geometry">
             <rect>
              <x>10</x>
-             <y>88</y>
+             <y>70</y>
              <width>80</width>
              <height>27</height>
             </rect>
@@ -697,7 +697,7 @@
            <property name="geometry">
             <rect>
              <x>10</x>
-             <y>118</y>
+             <y>100</y>
              <width>80</width>
              <height>27</height>
             </rect>
@@ -710,7 +710,7 @@
            <property name="geometry">
             <rect>
              <x>10</x>
-             <y>58</y>
+             <y>40</y>
              <width>80</width>
              <height>27</height>
             </rect>
@@ -723,7 +723,7 @@
            <property name="geometry">
             <rect>
              <x>10</x>
-             <y>148</y>
+             <y>130</y>
              <width>80</width>
              <height>27</height>
             </rect>
@@ -736,7 +736,7 @@
            <property name="geometry">
             <rect>
              <x>10</x>
-             <y>28</y>
+             <y>10</y>
              <width>80</width>
              <height>27</height>
             </rect>
@@ -756,6 +756,19 @@
            </property>
            <property name="text">
             <string>zj14</string>
+           </property>
+          </widget>
+          <widget class="QPushButton" name="test_137">
+           <property name="geometry">
+            <rect>
+             <x>10</x>
+             <y>160</y>
+             <width>80</width>
+             <height>27</height>
+            </rect>
+           </property>
+           <property name="text">
+            <string>sky-137</string>
            </property>
           </widget>
          </widget>
