@@ -414,18 +414,25 @@ void MainWindow::on_test_90_2_clicked()
 
 void MainWindow::on_readFileButton_clicked()
 {
-    changeTestinfo();
-    test->fileID = ui->lineEdit_6->text().toLongLong();
-    if(test->fileID>>61 == 1){
-        test->testFunc = T_DOWNLOAD_LFILE;
+    if(ui->readSize_edit->text().toInt() != 0 || ui->checkBox->isChecked())
+    {
+        changeTestinfo();
+        test->fileID = ui->lineEdit_6->text().toLongLong();
+        if(test->fileID>>61 == 1){
+            test->testFunc = T_DOWNLOAD_LFILE;
+        }
+        else{
+            test->downloadSize = atoi(ui->readSize_edit->text().toAscii());
+            test->offset = atoi(ui->offset_Edit->text().toAscii());
+            test->testFunc = T_DOWNLOAD;
+        }
+        createThread();
+        runThread();
     }
-    else{
-        test->downloadSize = atoi(ui->readSize_edit->text().toAscii());
-        test->offset = atoi(ui->offset_Edit->text().toAscii());
-        test->testFunc = T_DOWNLOAD;
+    else
+    {
+        QMessageBox::question(NULL, "error", "read length can not be zero", QMessageBox::Yes , QMessageBox::Yes);
     }
-    createThread();
-    runThread();
 }
 
 void MainWindow::on_upLocalFile_Ex_clicked()
