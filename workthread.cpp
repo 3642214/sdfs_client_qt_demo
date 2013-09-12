@@ -494,38 +494,40 @@ void workThread::testUploadLFile()
 void workThread::testDownloadLFile()
 {
     long long readFileID = testinfo1->fileID;
-    fd = sky_sdfs_open_littlefile(readFileID);
-//    qDebug()<<"fd="<<fd;
-    if(fd > 0){
-        int buffSize = testinfo1->buffsize;
-        QFile testFile("Thread_" + name + "_FId_" + QString("%1").arg(readFileID) + "-" + "littleFile");
-        if(testFile.open(QIODevice::WriteOnly))
-        {
-            char* buff = new char [1/**1024*/*1024];
-            int result = sky_sdfs_read_littlefile(fd,buff);
-            if(result != -1){
-                testFile.write(buff,result);
-                emit changeText("Thread ="
-                                + name
-                                + " Download ok. fileName: "
-                                + testFile.fileName());
-                testFile.close();
+    for(int i = 1;i<=testinfo1->count;i++){
+        fd = sky_sdfs_open_littlefile(readFileID);
+    //    qDebug()<<"fd="<<fd;
+        if(fd > 0){
+    //        int buffSize = testinfo1->buffsize;
+            QFile testFile("Thread_" + name + "count_" + QString("%1").arg(i) + "_FId_" + QString("%1").arg(readFileID) + "-" + "littleFile");
+            if(testFile.open(QIODevice::WriteOnly))
+            {
+                char* buff = new char [1/**1024*/*1024];
+                int result = sky_sdfs_read_littlefile(fd,buff);
+                if(result != -1){
+                    testFile.write(buff,result);
+                    emit changeText("Thread ="
+                                    + name
+                                    + " Download ok. fileName: "
+                                    + testFile.fileName());
+                    testFile.close();
+                }
+                else{
+                    char name1[100];
+                    int errorCode = getlasterror(fd,name1,100);
+                    qDebug()<<"ERROR:"<<errorCode<<name1;
+                    emit changeText("Thread ="
+                                    + name
+                                    + " FileID = "
+                                    + QString::number(readFileID)
+                                    + " ERROR:"
+                                    + QString::number(errorCode)
+                                    + name1);
+                    testFile.close();
+                    QFile::remove(testFile.fileName());
+                }
+                delete [] buff;
             }
-            else{
-                char name1[100];
-                int errorCode = getlasterror(fd,name1,100);
-                qDebug()<<"ERROR:"<<errorCode<<name1;
-                emit changeText("Thread ="
-                                + name
-                                + " FileID = "
-                                + QString::number(readFileID)
-                                + " ERROR:"
-                                + QString::number(errorCode)
-                                + name1);
-                testFile.close();
-                QFile::remove(testFile.fileName());
-            }
-            delete [] buff;
         }
     }
 }

@@ -420,6 +420,7 @@ void MainWindow::on_readFileButton_clicked()
         test->fileID = ui->lineEdit_6->text().toLongLong();
         if(test->fileID>>61 == 1){
             test->testFunc = T_DOWNLOAD_LFILE;
+            test->count = ui->uploadCount->text().toInt();
         }
         else{
             test->downloadSize = atoi(ui->readSize_edit->text().toAscii());
