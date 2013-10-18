@@ -373,7 +373,8 @@ void workThread::testDownload()
             testFileName = testFileName + "downloadSize_" + QString("%1").arg(downloadSize) + "M-";
         }
 
-        QFile testFile("Thread_" + name + "_FId_" + QString("%1").arg(readFileID) + "-" + testFileName + filename);
+        QString FName = "Thread_" + name + "_FId_" + QString("%1").arg(readFileID) + "-" + testFileName + filename;
+        QFile testFile( FName + ".tmp");
         sky_sdfs_lseek(fd,offset,SEEK_SET);
         if(testFile.open(QIODevice::WriteOnly)){
             if(buffSize > downloadSize){
@@ -383,56 +384,61 @@ void workThread::testDownload()
             char* buff = new char [buffSize*1024*1024];
             while(TRUE){
                 int result = 0;
-                if(downloadSize >= buffSize){
-                    result = sky_sdfs_read(fd,buff,(buffSize*1024*1024)*sizeof(char));
-//                    qDebug()<<"read1= "<<result;
-                }
-                else{
-                    if(downloadSize <= 0){
-                        emit changeText("Thread ="
-                                        + name
-                                        + " Download ok. fileName: "
-                                        + testFile.fileName());
-                        break;
-                    }
-                    result = sky_sdfs_read(fd,buff,(downloadSize*1024*1024)*sizeof(char));
+                qint64 writelength = 0;
+                result = sky_sdfs_read(fd,buff,(downloadSize*1024*1024)*sizeof(char));
 //                    qDebug()<<"read2= "<<result;
-                }
                 if (result > 0){
-                    qint64 writelength = testFile.write(buff,result);
-                }
-                else{
-                    if(result == -1){
-                        char name1[100];
-                        int errorCode = getlasterror(fd,name1,100);
-                        qDebug()<<"ERROR:"<<errorCode<<name1;
-                        emit changeText("Thread ="
-                                        + name
-                                        + " FileID = "
-                                        + QString::number(readFileID)
-                                        + " ERROR:"
-                                        + QString::number(errorCode)
-                                        + name1
-                                        );
-                        break;
-                    }
-                    else{
-//                        qDebug()<<result;
+                    writelength += testFile.write(buff,result);
+                    if(result < (downloadSize*1024*1024)*sizeof(char)){
                         emit changeText("Thread ="
                                         + name
                                         + "  Download ok. fileName: "
-                                        + testFile.fileName());
+                                        + FName);
+                        testFile.rename(FName);
                         break;
                     }
-
                 }
+                else if(result == -1){
+                    char name1[100];
+                    int errorCode = getlasterror(fd,name1,100);
+                    qDebug()<<"ERROR:"<<errorCode<<name1;
+                    emit changeText("Thread ="
+                                    + name
+                                    + " FileID = "
+                                    + QString::number(readFileID)
+                                    + " ERROR:"
+                                    + QString::number(errorCode)
+                                    + name1
+                                    );
+                    testFile.remove();
+                    break;
+                }
+                else if(result == 0){
+                    if(writelength > 0){
+                        emit changeText("Thread ="
+                                        + name
+                                        + "  Download ok. fileName: "
+                                        + FName);
+                        testFile.rename(FName);
+                        break;
+                    }
+                    else{
+                        emit changeText("Thread ="
+                                        + name
+                                        + " No Data To Download(EOF).");
+                        qDebug()<<testFile.fileName();
+                        testFile.remove();
+                        break;
+                }
+
+               }
                 if(!testinfo1->downloadAll){
                     downloadSize = downloadSize - buffSize;
     //                qDebug()<<"downloadSizeEND= "<<downloadSize;
                 }
             }
              delete [] buff;
-            testFile.close();
+             testFile.close();
         }
     }
     else{
@@ -499,7 +505,7 @@ void workThread::testDownloadLFile()
     //    qDebug()<<"fd="<<fd;
         if(fd > 0){
     //        int buffSize = testinfo1->buffsize;
-            QFile testFile("Thread_" + name + "count_" + QString("%1").arg(i) + "_FId_" + QString("%1").arg(readFileID) + "-" + "littleFile");
+            QFile testFile("Thread_" + name + "count_" + QString("%1").arg(i) + "_FId_" + QString("%1").arg(readFileID) + "-" + "littleFile.tmp");
             if(testFile.open(QIODevice::WriteOnly))
             {
                 char* buff = new char [1/**1024*/*1024];
@@ -510,6 +516,7 @@ void workThread::testDownloadLFile()
                                     + name
                                     + " Download ok. fileName: "
                                     + testFile.fileName());
+                    testFile.rename("Thread_" + name + "count_" + QString("%1").arg(i) + "_FId_" + QString("%1").arg(readFileID) + "-" + "littleFile");
                     testFile.close();
                 }
                 else{
