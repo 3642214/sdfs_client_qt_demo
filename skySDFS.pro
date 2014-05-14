@@ -9,7 +9,7 @@ QT       += core gui
 TARGET = skySDFS
 TEMPLATE = app
 
-win32:LIBS += -L$$PWD/ -lskyFS-client-c
+win32:LIBS += -L$$PWD/ -lskyFS-client-cD
 else:unix:LIBS += -L$$PWD/ -lclient
 
 SOURCES += main.cpp\

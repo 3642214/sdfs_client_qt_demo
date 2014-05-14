@@ -14,6 +14,7 @@
 #include <QThread>
 #include <QFile>
 #include <QTime>
+#include "SkySDFSSDK.h"
 
 typedef struct testinfo{
     int     testFunc;
@@ -48,6 +49,7 @@ public:
     void run();
 
 public slots:
+    fileinfo* setFileInfo(QString fileName,int blockLength,int copySize);
 
 signals:
     void changeText(QString str);
@@ -76,9 +78,11 @@ private:
     qint64 allUploadFileSize ;
     char errorCode[100];
 
+
 public:
     QString name;
     QTime time;
+
 
 };
 

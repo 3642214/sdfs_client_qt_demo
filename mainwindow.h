@@ -27,6 +27,7 @@ private slots:
     void on_readButton_clicked();
     void setLog(QString text);
 
+
 private:
     Ui::MainWindow *ui;
     testinfo* test;
@@ -62,6 +63,8 @@ private slots:
     void on_upLittleFileButton_clicked();
     void on_pushButton_clicked();
     void on_test_137_clicked();
+ public slots:
+
 };
 
 #endif // MAINWINDOW_H

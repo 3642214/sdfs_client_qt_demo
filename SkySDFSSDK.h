@@ -1,6 +1,8 @@
-#include <stdio.h>
+//#include <stdio.h>
 #ifndef SKY_SDFS_SDK_H
 #define SKY_SDFS_SDK_H
+
+#include <stdio.h>
 
 #ifndef WIN32
 #define SKY_SDFS_API(X) X 
@@ -52,34 +54,42 @@ typedef struct fileinfo{
 	int 		blocklength;
 }fileinfo;
 
+typedef struct clientconfig{
+	char		cn_ips[100];
+	int			cnport;
+	int			indexport;
+	int			snport;
+	char		rack[100];
+}clientconfig;
+
 SKY_SDFS_API(int) sky_sdfs_init(const char* path);
 
 SKY_SDFS_API(int) sky_sdfs_init_ex(const char* path,int paras,...); //sky_sdfs_init_ex("config.ini",2,"cnips","192.168.8.101","cnport",29001);
 SKY_SDFS_API(int) sky_sdfs_init_list(const char* path,int paras , va_list args);
-SKY_SDFS_API(int) sky_sdfs_cleanup(void);
 
-SKY_SDFS_API(long long) sky_sdfs_createfile(const char* filename , int blocklength , int copysize);
-SKY_SDFS_API(long long) sky_sdfs_createfile_ex(const char* filename , int blocklength , int copysize , int filetype , const char* StartTime , long long lfileid);
+SKY_SDFS_API(int) client_uninit(void);
+SKY_SDFS_API(int) client_init(clientconfig* config);
 
-SKY_SDFS_API(long long) sky_sdfs_upload_littlefile(const char* filename, const char* filepath, int copysize, const char* StartTime);
+SKY_SDFS_API(long long) client_create(fileinfo* info);
+SKY_SDFS_API(int) client_open(long long fileid , int mode);
 
-SKY_SDFS_API(int) sky_sdfs_openfile(long long fileid , int mode);
-SKY_SDFS_API(int) sky_sdfs_open_littlefile(long long fileid);
+SKY_SDFS_API(long long) client_upload(fileinfo* info , const char* filepath);
+SKY_SDFS_API(long long) client_download(long long fileid , const char* filepath);
 
-SKY_SDFS_API(void) sky_sdfs_close( int fd);
-SKY_SDFS_API(int) sky_sdfs_write( int fd,const void* buf,int nbytes);
-SKY_SDFS_API(int) sky_sdfs_read( int fd , const void* buf , int nbytes);
-SKY_SDFS_API(int) sky_sdfs_read_littlefile( int fd , const void* buf);
+SKY_SDFS_API(int) client_write( int fd,const void* buf,int nbytes);
+SKY_SDFS_API(int) client_read( int fd , const void* buf , int nbytes);
+
 SKY_SDFS_API(int) getlasterror( int fd , void* errorinfo,int len);
-SKY_SDFS_API(long long) sky_sdfs_lseek( int fd, long long offset, int whence);
+SKY_SDFS_API(void) client_close( int fd);
 
-SKY_SDFS_API(long long) sky_sdfs_deletefile(long long fileid);
-SKY_SDFS_API(int) sky_sdfs_lockfile(long long fileid);
-SKY_SDFS_API(int) sky_sdfs_unlockfile(long long fileid);
+SKY_SDFS_API(long long) client_delete(long long fileid);
+SKY_SDFS_API(int) client_lock(long long fileid);
+SKY_SDFS_API(int) client_unlock(long long fileid);
 
-SKY_SDFS_API(long long) sky_sdfs_search(int fd , const char* time , int mark);
+SKY_SDFS_API(long long) client_search(int fd , const char* time , int mark);
+SKY_SDFS_API(long long) client_postion( int fd, long long offset, int whence);
 
-SKY_SDFS_API(int) sky_sdfs_fileinfo( long long fileid , fileinfo* info);
+SKY_SDFS_API(int) get_fileinfo( long long fileid , fileinfo* info);
 
 SKY_SDFS_API(int) sky_sdfs_sync(int fd);
 SKY_SDFS_API(int) sky_sdfs_close_pipe(void);

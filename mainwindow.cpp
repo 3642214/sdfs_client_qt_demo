@@ -28,14 +28,23 @@ MainWindow::MainWindow(QWidget *parent) :
     threadList = new QList<workThread*>;
     ui->setupUi(this);
     ui->textEdit->ensureCursorVisible();
-    sky_sdfs_init("config.ini");
+//    sky_sdfs_init("config.ini");
+    clientconfig* cconfig = new clientconfig;
+    cconfig->cnport = 29009;
+    memcpy(cconfig->cn_ips,"192.168.8.209",13);
+    cconfig->cn_ips[13] = '\0';
+    cconfig->indexport = 29001;
+    cconfig->snport = 29000;
+    memcpy(cconfig->rack,"/root/rack22",12);
+    cconfig->rack[12] = '\0';
+    client_init(cconfig);
     connect(ui->textEdit,SIGNAL(textChanged()),this,SLOT(textDown()));
     connect(ui->checkBox,SIGNAL(clicked()),this,SLOT(changeValue()));
 }
 
 MainWindow::~MainWindow()
 {
-    sky_sdfs_cleanup();
+    client_uninit();
     if(!threadList->isEmpty()){
         qDebug()<<threadList->length();
         for(int i=0;i<threadList->length();i++)
@@ -153,7 +162,7 @@ bool MainWindow::uploadFile(long long fileFid,QString fileName)
 {
     bool res = false;
     long long allrst = 0;
-    int fileFd = sky_sdfs_openfile(fileFid,O_WRITE);
+    int fileFd = client_open(fileFid,O_WRITE);
     qDebug()<<"fileName= "<<fileName<<" fileFid="<<fileFid<<" fileFd="<<fileFd;
     QFile file(fileName);
     qDebug()<<"file.size"<<file.size();
@@ -165,7 +174,7 @@ bool MainWindow::uploadFile(long long fileFid,QString fileName)
             int size = file.read(buff,(buffSize*1024*1024)*sizeof(char));
                       qDebug()<<"read file size = "<<size	;
             qDebug()<<"write start";
-            int result = sky_sdfs_write(fileFd,buff,size);
+            int result = client_write(fileFd,buff,size);
             qDebug()<<"result"<<result;
             if(result == -1){
                 char name[100];
@@ -186,7 +195,7 @@ bool MainWindow::uploadFile(long long fileFid,QString fileName)
         qDebug()<<fileName<<" open failed!!! or Fid|Fd < 0 or file.size = 0";
     }
     file.close();
-    sky_sdfs_close(fileFd);
+    client_close(fileFd);
     return res;
 }
 
@@ -291,8 +300,12 @@ void MainWindow::on_upLocalFile_clicked()
 
 void MainWindow::on_test_87_1_clicked()
 {
-    long long testfid = sky_sdfs_createfile("testfilename",BLOCKLENGTH,1);
-    int testfd = sky_sdfs_openfile(testfid + 123,O_READ);
+    fileinfo* finfo = new fileinfo;
+    memcpy(finfo->name,"testfilename",100);
+    finfo->blocklength = BLOCKLENGTH;
+    finfo->copysize = 1;
+    long long testfid = client_create(finfo);
+    int testfd = client_open(testfid + 123,O_READ);
     if(testfd == -1 and testfid != -1){
         ui->textEdit->append(QString::number(lineCount) + " -----> use wrong fileid to open file           test    OK");
         lineCount++;
@@ -301,17 +314,21 @@ void MainWindow::on_test_87_1_clicked()
         ui->textEdit->append(QString::number(lineCount) + " -----> use wrong fileid to open file           test    FAIL");
         lineCount++;
     }
-    //    sky_sdfs_cleanup();
+    //    client_uninit();
 }
 
 void MainWindow::on_test_87_2_clicked()
 {
-    long long testfid = sky_sdfs_createfile(QString::number(lineCount).toAscii().constData(),BLOCKLENGTH,1);
-    int testfd = sky_sdfs_openfile(testfid,O_WRITE);
+    fileinfo* finfo = new fileinfo;
+    memcpy(finfo->name,QString::number(lineCount).toAscii().constData(),100);
+    finfo->blocklength = BLOCKLENGTH;
+    finfo->copysize = 1;
+    long long testfid = client_create(finfo);
+    int testfd = client_open(testfid,O_WRITE);
 //    char buff[BUFFSIZE];
     int buffSize = atoi(ui->lineEdit_buffSize->text().toAscii());
     char* buff = new char [buffSize*1024*1024];
-    int result = sky_sdfs_read(testfd,buff,(buffSize*1024*1024)*sizeof(char));
+    int result = client_read(testfd,buff,(buffSize*1024*1024)*sizeof(char));
     qDebug()<<result<<testfd;
     if(result == -1 and testfd != -1){
         char name1[100];
@@ -327,19 +344,22 @@ void MainWindow::on_test_87_2_clicked()
         lineCount++;
     }
     delete [] buff;
-    //    sky_sdfs_cleanup();
+    //    client_uninit();
 }
 
 
 void MainWindow::on_test_87_3_clicked()
 {
-    //    sky_sdfs_init("config.ini");
-    long long testfid = sky_sdfs_createfile("testfilename",BLOCKLENGTH,1);
-    int testfd = sky_sdfs_openfile(testfid,O_READ);
+    fileinfo* finfo = new fileinfo;
+    memcpy(finfo->name,"testfilename",100);
+    finfo->blocklength = BLOCKLENGTH;
+    finfo->copysize = 1;
+    long long testfid = client_create(finfo);
+    int testfd = client_open(testfid,O_READ);
 //    char buff[BUFFSIZE];
     int buffSize = atoi(ui->lineEdit_buffSize->text().toAscii());
     char* buff = new char [buffSize*1024*1024];
-    int result = sky_sdfs_write(testfd,buff,(buffSize*1024*1024)*sizeof(char));
+    int result = client_write(testfd,buff,(buffSize*1024*1024)*sizeof(char));
     qDebug()<<result;
     if(result == -1 and testfd != -1){
         char name1[100];
@@ -360,13 +380,17 @@ void MainWindow::on_test_87_3_clicked()
 
 void MainWindow::on_test_90_1_clicked()
 {
-    long long testfid = sky_sdfs_createfile("testfilename",BLOCKLENGTH,1);
-    int testfd = sky_sdfs_openfile(testfid,O_WRITE);
-    sky_sdfs_close(testfd);
+    fileinfo* finfo = new fileinfo;
+    memcpy(finfo->name,"testfilename",100);
+    finfo->blocklength = BLOCKLENGTH;
+    finfo->copysize = 1;
+    long long testfid = client_create(finfo);
+    int testfd = client_open(testfid,O_WRITE);
+    client_close(testfd);
 //    char buff[BUFFSIZE];
     int buffSize = atoi(ui->lineEdit_buffSize->text().toAscii());
     char* buff = new char [buffSize*1024*1024];
-    int result = sky_sdfs_write(testfd,buff,(buffSize*1024*1024)*sizeof(char));
+    int result = client_write(testfd,buff,(buffSize*1024*1024)*sizeof(char));
     qDebug()<<result;
     if(result == -1 and testfd != -1){
         char name1[100];
@@ -382,19 +406,22 @@ void MainWindow::on_test_90_1_clicked()
         lineCount++;
     }
     delete [] buff;
-    //    sky_sdfs_cleanup();
+    //    client_uninit();
 }
 
 void MainWindow::on_test_90_2_clicked()
 {
-    //    sky_sdfs_init("config.ini");
-    long long testfid = sky_sdfs_createfile("testfilename",BLOCKLENGTH,1);
-    int testfd = sky_sdfs_openfile(testfid,O_READ);
-    sky_sdfs_close(testfd);
+    fileinfo* finfo = new fileinfo;
+    memcpy(finfo->name,"testfilename",100);
+    finfo->blocklength = BLOCKLENGTH;
+    finfo->copysize = 1;
+    long long testfid = client_create(finfo);
+    int testfd = client_open(testfid,O_READ);
+    client_close(testfd);
 //    char buff[BUFFSIZE];
     int buffSize = atoi(ui->lineEdit_buffSize->text().toAscii());
     char* buff = new char [buffSize*1024*1024];
-    int result = sky_sdfs_read(testfd,buff,(buffSize*1024*1024)*sizeof(char));
+    int result = client_read(testfd,buff,(buffSize*1024*1024)*sizeof(char));
     qDebug()<<result;
     if(result == -1 and testfd != -1){
         char name1[100];
@@ -465,7 +492,7 @@ void MainWindow::on_readFileInfo_clicked()
 {
     info = new fileinfo;
     readFileID = ui->lineEdit_6->text().toLongLong();
-    int res = sky_sdfs_fileinfo(readFileID,info);
+    int res = get_fileinfo(readFileID,info);
     qDebug()<<res
            <<info->beginTime
           <<info->blocklength
@@ -503,7 +530,7 @@ void MainWindow::on_readFileInfo_clicked()
 void MainWindow::on_deleteFileButton_clicked()
 {
     readFileID = ui->lineEdit_6->text().toLongLong();
-    int result = sky_sdfs_deletefile(readFileID);
+    int result = client_delete(readFileID);
     if(result == -1){
         char name1[100];
         int errcode = getlasterror(result,name1,100);
@@ -523,7 +550,7 @@ void MainWindow::textDown()
 void MainWindow::on_lockFileButton_clicked()
 {
     readFileID = ui->lineEdit_6->text().toLongLong();
-    int result = sky_sdfs_lockfile(readFileID);
+    int result = client_lock(readFileID);
     if(result == -1){
         char name1[100];
         int errcode = getlasterror(result,name1,100);
@@ -538,7 +565,7 @@ void MainWindow::on_lockFileButton_clicked()
 void MainWindow::on_unLockFileButton_clicked()
 {
     readFileID = ui->lineEdit_6->text().toLongLong();
-    int result = sky_sdfs_unlockfile(readFileID);
+    int result = client_unlock(readFileID);
     if(result == -1){
         char name1[100];
         int errcode = getlasterror(result,name1,100);
@@ -554,8 +581,8 @@ void MainWindow::on_serachButton_clicked()
 {
     QString time = ui->dateTimeEdit->text();
     int fileID = atoi(ui->lineEdit_6->text().toAscii());
-    int fd = sky_sdfs_openfile(fileID,O_READ);
-    int result = sky_sdfs_search(fd,time.toLatin1().data(),STARTTIME);
+    int fd = client_open(fileID,O_READ);
+    int result = client_search(fd,time.toLatin1().data(),STARTTIME);
 //    qDebug()<<result;
     if(result == -1){
         char name1[100];
@@ -588,10 +615,11 @@ void MainWindow::on_upLittleFileButton_clicked()
 void MainWindow::on_pushButton_clicked()
 {
     sky_sdfs_close_pipe();
-//    sky_sdfs_cleanup();
+//    client_uninit();
 }
 
 void MainWindow::on_test_137_clicked()
 {
 
 }
+
