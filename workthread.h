@@ -10,6 +10,8 @@
 #define T_DOWNLOAD      7
 #define T_UPLOAD_LFILE  8
 #define T_DOWNLOAD_LFILE 9
+#define T_UPLOAD_FILE 10
+#define T_DOWNLOAD_NEW 11
 
 #include <QThread>
 #include <QFile>
@@ -64,6 +66,8 @@ private:
     void testDownload();
     void testUploadLFile();
     void testDownloadLFile();
+    void testUploadFile();
+    void testNewDownload();
     bool uploadFile(long long fileFid, QString fileName);
     void close();
 

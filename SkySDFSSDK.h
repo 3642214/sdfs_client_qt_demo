@@ -44,11 +44,11 @@ extern "C" {
 typedef struct fileinfo{
 	long long 	fileid;
 	char 		name[100];
-	int			filetype;
+        int		filetype;
 	int 		filemode;
 	char	 	beginTime[23];
 	int 		owner;
-	int			copysize;
+        int		copysize;
 	int 		blocksize;
 	long long 	link;
 	int 		blocklength;
@@ -62,7 +62,7 @@ typedef struct clientconfig{
 	char		rack[100];
 }clientconfig;
 
-SKY_SDFS_API(int) sky_sdfs_init(const char* path);
+//SKY_SDFS_API(int) sky_sdfs_init(const char* path);
 
 SKY_SDFS_API(int) sky_sdfs_init_ex(const char* path,int paras,...); //sky_sdfs_init_ex("config.ini",2,"cnips","192.168.8.101","cnport",29001);
 SKY_SDFS_API(int) sky_sdfs_init_list(const char* path,int paras , va_list args);

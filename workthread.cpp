@@ -72,24 +72,44 @@ void workThread::run()
         this->testUploadLFile();
         break;
     }
+    case T_UPLOAD_FILE:
+    {
+        qDebug()<<this->name<<"T_UPLOAD_FILE thread start";
+        this->testUploadFile();
+        break;
+    }
     case T_DOWNLOAD_LFILE:
     {
         qDebug()<<this->name<<"T_DOWNLOAD_LFILE thread start";
         this->testDownloadLFile();
         break;
     }
+    case T_DOWNLOAD_NEW:
+    {
+        qDebug()<<this->name<<"T_DOWNLOAD_NEW thread start";
+        this->testNewDownload();
+        break;
     }
-//    this->close();
-//    client_close(fd);
-//    qDebug()<<"Thread "<<name<<"fd= "<<fd<<" closed";
+    }
+    //    this->close();
+    //    client_close(fd);
+    //    qDebug()<<"Thread "<<name<<"fd= "<<fd<<" closed";
 }
 
 void workThread::testCreate()
 {
     this->init();
     time.start();
-    fileinfo* finfo = setFileInfo(name.toAscii().data(),testinfo1->blocklength*1024*1024,testinfo1->copysize);
-    fileID = client_create(finfo);
+
+    struct fileinfo finfo = {
+        finfo.copysize=testinfo1->copysize,
+        finfo.filetype=NORMAL_FILE,
+        finfo.blocklength=testinfo1->blocklength*1024*1024,
+    };
+    memcpy(finfo.name,name.toAscii().data(),100);
+
+    fileID = client_create(&finfo);
+
     qDebug()<<"Thread"<<name<<":"<<"fileID="<<fileID<<";blocklength="<<testinfo1->blocklength<<";copysize="<<testinfo1->copysize;
     if(fileID > 0){
         emit changeText(name + "    testCreate   true");
@@ -298,50 +318,50 @@ void workThread::testUpload()
 void workThread::testUpload_ex()
 {
     for(int i = 1;i<=testinfo1->count;i++){
-            QFileInfo fileInfo(testinfo1->fileName);
-            QFileInfo idxFileInfo(testinfo1->idxName);
+        QFileInfo fileInfo(testinfo1->fileName);
+        QFileInfo idxFileInfo(testinfo1->idxName);
 
-            fileinfo* finfo =setFileInfo(fileInfo.fileName().toUtf8().constData(),testinfo1->blocklength*1024*1024,testinfo1->copysize);
-            memcpy(finfo->beginTime,testinfo1->startTime.toAscii().data(),24);
-            finfo->filetype = NORMAL_FILE;
-            long long fileFid = client_create(finfo);
+        fileinfo* finfo =setFileInfo(fileInfo.fileName().toUtf8().constData(),testinfo1->blocklength*1024*1024,testinfo1->copysize);
+        memcpy(finfo->beginTime,testinfo1->startTime.toAscii().data(),24);
+        finfo->filetype = NORMAL_FILE;
+        long long fileFid = client_create(finfo);
 
-            memcpy(finfo->name,idxFileInfo.fileName().toAscii().constData(),101);
-            finfo->filetype = INDEX_FILE;
-            finfo->link = fileFid;
-            long long idxFid = client_create(finfo);
+        memcpy(finfo->name,idxFileInfo.fileName().toAscii().constData(),100);
+        finfo->filetype = INDEX_FILE;
+        finfo->link = fileFid;
+        long long idxFid = client_create(finfo);
 
-            if(fileFid > 0 and idxFid > 0){
-                if(uploadFile(fileFid,testinfo1->fileName) and uploadFile(idxFid,testinfo1->idxName)){
-                    emit changeText("Count ="
-                                    + QString::number(i)
-                                    + " Thread ="
-                                    + name
-                                    + "  Upload ok . videoFid= "
-                                    + QString::number(fileFid)
-                                    + "  idxFid = "
-                                    + QString::number(idxFid));
-                    qDebug()<<"count = "<<i<<"video:"<<fileInfo.fileName()<<"idx:"<<idxFileInfo.fileName()<<"  upload ok";
-                }
-                else{
-                    emit changeText("Count ="
-                                    + QString::number(i)
-                                    + " Thread ="
-                                    + name
-                                    + "  Upload Fail: "
-                                    + errorCode
-                                    + "  FileID = "
-                                    + QString::number(fileFid));
-                    qDebug()<<"count = "<<i<<fileInfo.fileName()<<"idx:"<<idxFileInfo.fileName()<<"  upload fail";
-                }
+        if(fileFid > 0 and idxFid > 0){
+            if(uploadFile(fileFid,testinfo1->fileName) and uploadFile(idxFid,testinfo1->idxName)){
+                emit changeText("Count ="
+                                + QString::number(i)
+                                + " Thread ="
+                                + name
+                                + "  Upload ok . videoFid= "
+                                + QString::number(fileFid)
+                                + "  idxFid = "
+                                + QString::number(idxFid));
+                qDebug()<<"count = "<<i<<"video:"<<fileInfo.fileName()<<"idx:"<<idxFileInfo.fileName()<<"  upload ok";
             }
             else{
-                qDebug()<<"Thread "<<name<<"ERROR:"<<getlasterror(-1,errorCode,100)<<errorCode;
-                emit changeText("count ="
+                emit changeText("Count ="
                                 + QString::number(i)
-                                + "  upload fail(create): "
-                                + errorCode);
+                                + " Thread ="
+                                + name
+                                + "  Upload Fail: "
+                                + errorCode
+                                + "  FileID = "
+                                + QString::number(fileFid));
+                qDebug()<<"count = "<<i<<fileInfo.fileName()<<"idx:"<<idxFileInfo.fileName()<<"  upload fail";
             }
+        }
+        else{
+            qDebug()<<"Thread "<<name<<"ERROR:"<<getlasterror(-1,errorCode,100)<<errorCode;
+            emit changeText("count ="
+                            + QString::number(i)
+                            + "  upload fail(create): "
+                            + errorCode);
+        }
     }
 }
 
@@ -350,10 +370,10 @@ void workThread::testDownload()
     fileinfo* info = new fileinfo;
     long long readFileID = testinfo1->fileID;
     fd = client_open(readFileID,O_READ);
-//       qDebug()<<fd;
+    //       qDebug()<<fd;
     if(fd > 0){
         get_fileinfo(readFileID,info);
-//        qDebug()<<info->name;
+        //        qDebug()<<info->name;
         QFileInfo fileInfo(info->name);
         QString filename = fileInfo.fileName();
         long long offset = testinfo1->offset;
@@ -379,16 +399,16 @@ void workThread::testDownload()
             if(buffSize > downloadSize){
                 buffSize = downloadSize;
             }
-//            qDebug()<<"buffSize"<<buffSize;
+            //            qDebug()<<"buffSize"<<buffSize;
             char* buff = new char [buffSize*1024*1024];
             while(TRUE){
                 int result = 0;
                 qint64 writelength = 0;
                 result = client_read(fd,buff,(downloadSize*1024*1024)*sizeof(char));
-//                    qDebug()<<"read2= "<<result;
+                //                    qDebug()<<"read2= "<<result;
                 if (result > 0){
                     writelength += testFile.write(buff,result);
-                    if(result < (downloadSize*1024*1024)*sizeof(char)){
+                    if(result <= (downloadSize*1024*1024)*sizeof(char)){
                         emit changeText("Thread ="
                                         + name
                                         + "  Download ok. fileName: "
@@ -428,16 +448,16 @@ void workThread::testDownload()
                         qDebug()<<testFile.fileName();
                         testFile.remove();
                         break;
-                }
+                    }
 
-               }
+                }
                 if(!testinfo1->downloadAll){
                     downloadSize = downloadSize - buffSize;
-    //                qDebug()<<"downloadSizeEND= "<<downloadSize;
+                    //                qDebug()<<"downloadSizeEND= "<<downloadSize;
                 }
             }
-             delete [] buff;
-             testFile.close();
+            delete [] buff;
+            testFile.close();
         }
     }
     else{
@@ -457,35 +477,71 @@ void workThread::testUploadLFile()
         for(int j = 0;j<testinfo1->filePath.length();j++){
             QFile file(testinfo1->filePath.at(j));
             QFileInfo fileInfo(file);
-//            long long fileFid = 0;
+            //            long long fileFid = 0;
             fileinfo* finfo =setFileInfo(fileInfo.fileName().toUtf8().constData(),testinfo1->blocklength*1024*1024,testinfo1->copysize);
-//            memcpy(finfo->beginTime,testinfo1->startTime.toAscii().data(),24);
+            //            memcpy(finfo->beginTime,testinfo1->startTime.toAscii().data(),24);
             finfo->filetype = LITTLE_FILE;
+            finfo->fileid = 0;
             long long fileFid = client_upload(finfo,testinfo1->filePath.at(j).toUtf8().constData());
             qDebug()<<fileFid<<testinfo1->filePath.at(j).toUtf8().constData()<<finfo->beginTime;
             if(fileFid >0){
-//                if(uploadFile(fileFid,testinfo1->filePath.at(j))){
-                    emit changeText("Count ="
-                                    + QString::number(i)
-                                    + " Thread ="
-                                    + name
-                                    + "  Upload ok . FileID = "
-                                    + QString::number(fileFid)
-                                    + "  FileName = "
-                                    +fileInfo.fileName());
-                    qDebug()<<"count = "<<i<<" filelist.at="<<j<<fileInfo.fileName()<<"  upload ok";
-//                }
-//                else{
-//                    emit changeText("Count ="
-//                                    + QString::number(i)
-//                                    + " Thread ="
-//                                    + name
-//                                    + "  Upload Fail: "
-//                                    + errorCode
-//                                    + "  FileID = "
-//                                    + QString::number(fileFid));
-//                    qDebug()<<"count = "<<i<<" filelist.at="<<j<<fileInfo.fileName()<<"  upload fail";
-//                }
+                //                if(uploadFile(fileFid,testinfo1->filePath.at(j))){
+                emit changeText("Count ="
+                                + QString::number(i)
+                                + " Thread ="
+                                + name
+                                + "  Upload ok . FileID = "
+                                + QString::number(fileFid)
+                                + "  FileName = "
+                                +fileInfo.fileName());
+                qDebug()<<"count = "<<i<<" filelist.at="<<j<<fileInfo.fileName()<<"  upload ok";
+                //                }
+                //                else{
+                //                    emit changeText("Count ="
+                //                                    + QString::number(i)
+                //                                    + " Thread ="
+                //                                    + name
+                //                                    + "  Upload Fail: "
+                //                                    + errorCode
+                //                                    + "  FileID = "
+                //                                    + QString::number(fileFid));
+                //                    qDebug()<<"count = "<<i<<" filelist.at="<<j<<fileInfo.fileName()<<"  upload fail";
+                //                }
+            }
+            else{
+                qDebug()<<"Thread "<<name<<"ERROR:"<<getlasterror(-1,errorCode,100)<<errorCode;
+                emit changeText("count ="
+                                + QString::number(i)
+                                + "  upload fail(create): "
+                                + errorCode);
+            }
+        }
+    }
+}
+
+void workThread::testUploadFile()
+{
+    for(int i = 1;i<=testinfo1->count;i++){
+        for(int j = 0;j<testinfo1->filePath.length();j++){
+            QFile file(testinfo1->filePath.at(j));
+            QFileInfo fileInfo(file);
+            fileinfo* finfo =setFileInfo(fileInfo.fileName().toUtf8().constData(),testinfo1->blocklength*1024*1024,testinfo1->copysize);
+            memcpy(finfo->beginTime,testinfo1->startTime.toAscii().data(),24);
+            finfo->filetype = NORMAL_FILE;
+            finfo->fileid = 0;
+            long long fileFid = client_upload(finfo,testinfo1->filePath.at(j).toUtf8().constData());
+            qDebug()<<fileFid<<testinfo1->filePath.at(j).toUtf8().constData()<<finfo->beginTime;
+            if(fileFid >0){
+                //                if(uploadFile(fileFid,testinfo1->filePath.at(j))){
+                emit changeText("Count ="
+                                + QString::number(i)
+                                + " Thread ="
+                                + name
+                                + "  Upload ok . FileID = "
+                                + QString::number(fileFid)
+                                + "  FileName = "
+                                +fileInfo.fileName());
+                qDebug()<<"count = "<<i<<" filelist.at="<<j<<fileInfo.fileName()<<"  upload ok";
             }
             else{
                 qDebug()<<"Thread "<<name<<"ERROR:"<<getlasterror(-1,errorCode,100)<<errorCode;
@@ -502,40 +558,27 @@ void workThread::testDownloadLFile()
 {
     long long readFileID = testinfo1->fileID;
     for(int i = 1;i<=testinfo1->count;i++){
-        fd = client_open(readFileID,3);
-    //    qDebug()<<"fd="<<fd;
-        if(fd > 0){
-    //        int buffSize = testinfo1->buffsize;
-            QFile testFile("Thread_" + name + "count_" + QString("%1").arg(i) + "_FId_" + QString("%1").arg(readFileID) + "-" + "littleFile.tmp");
-            if(testFile.open(QIODevice::WriteOnly))
-            {
-                char* buff = new char [1/**1024*/*1024];
-                int result = client_read(fd,buff,1024);
-                if(result != -1){
-                    testFile.write(buff,result);
-                    emit changeText("Thread ="
-                                    + name
-                                    + " Download ok. fileName: "
-                                    + testFile.fileName());
-                    testFile.rename("Thread_" + name + "count_" + QString("%1").arg(i) + "_FId_" + QString("%1").arg(readFileID) + "-" + "littleFile");
-                    testFile.close();
-                }
-                else{
-                    char name1[100];
-                    int errorCode = getlasterror(fd,name1,100);
-                    qDebug()<<"ERROR:"<<errorCode<<name1;
-                    emit changeText("Thread ="
-                                    + name
-                                    + " FileID = "
-                                    + QString::number(readFileID)
-                                    + " ERROR:"
-                                    + QString::number(errorCode)
-                                    + name1);
-                    testFile.close();
-                    QFile::remove(testFile.fileName());
-                }
-                delete [] buff;
-            }
+        QFile testFile("Thread_" + name + "count_" + QString("%1").arg(i) + "_FId_" + QString("%1").arg(readFileID) + "-" + "littleFile.tmp");
+        if(client_download(readFileID,testFile.fileName().toAscii().data()) > 0){
+            emit changeText("Thread ="
+                            + name
+                            + " Download ok. fileName: "
+                            + testFile.fileName());
+            testFile.rename("Thread_" + name + "count_" + QString("%1").arg(i) + "_FId_" + QString("%1").arg(readFileID) + "-" + "littleFile");
+        }
+        else{
+            char name1[100];
+            int errorCode = getlasterror(fd,name1,100);
+            qDebug()<<"ERROR:"<<errorCode<<name1;
+            emit changeText("Thread ="
+                            + name
+                            + " FileID = "
+                            + QString::number(readFileID)
+                            + " ERROR:"
+                            + QString::number(errorCode)
+                            + name1);
+            testFile.close();
+            QFile::remove(testFile.fileName());
         }
     }
 }
@@ -550,7 +593,7 @@ bool workThread::uploadFile(long long fileFid, QString fileName)
     {
     case T_UPLOAD_LFILE:
     {
-//        fd = client_open(fileFid);
+        //        fd = client_open(fileFid);
 
         break;
     }
@@ -562,7 +605,7 @@ bool workThread::uploadFile(long long fileFid, QString fileName)
     qDebug()<<"~~~~~~id= "<<fileFid<<"  FD= "<<fd;
 
     if(file.open(QIODevice::ReadOnly) and fileFid > 0 and fd > 0){
-//        char buff[BUFFSIZE];
+        //        char buff[BUFFSIZE];
         char* buff = new char [testinfo1->buffsize*1024*1024];
         while(!file.atEnd()){
             int size = file.read(buff,(testinfo1->buffsize*1024*1024)*sizeof(char));
@@ -571,7 +614,7 @@ bool workThread::uploadFile(long long fileFid, QString fileName)
             {
             case T_UPLOAD_LFILE:
             {
-//                result = client_write_littlefile(fd,buff,size);
+                //                result = client_write_littlefile(fd,buff,size);
                 break;
             }
             default:
@@ -592,7 +635,7 @@ bool workThread::uploadFile(long long fileFid, QString fileName)
         client_close(fd);
         delete [] buff;
     }
-//    qDebug()<<res;
+    //    qDebug()<<res;
     return res;
 }
 
@@ -610,16 +653,45 @@ bool workThread::checkFile(QFile file1, QFile file2)
 
 void workThread::init()
 {
-//        sky_sdfs_init("config.ini");
+    //        sky_sdfs_init("config.ini");
 }
 
 
 fileinfo * workThread::setFileInfo(QString fileName, int blockLength, int copySize)
 {
-    fileinfo* finfo = new fileinfo;
-    memcpy(finfo->name,fileName.toAscii().constData(),101);
-    finfo->blocklength = blockLength;
-    finfo->copysize = copySize;
-    finfo->filetype = NORMAL_FILE;
-    return finfo;
+    struct fileinfo finfo = {
+        finfo.copysize=copySize,
+        finfo.filetype=NORMAL_FILE,
+        finfo.blocklength=blockLength*1024*1024,
+    };
+
+    memcpy(finfo.name,fileName.toAscii().constData(),100);
+    return &finfo;
+}
+
+void workThread::testNewDownload()
+{
+    long long readFileID = testinfo1->fileID;
+        QFile testFile("Thread_" + name + "_FId_" + QString("%1").arg(readFileID) + "-" + "newDownloadFile.tmp");
+        if(client_download(readFileID,testFile.fileName().toAscii().data()) >= 0){
+            emit changeText("Thread ="
+                            + name
+                            + " Download ok. fileName: "
+                            + testFile.fileName());
+            testFile.rename("Thread_" + name + "_FId_" + QString("%1").arg(readFileID) + "-" + "newDownloadFile");
+        }
+        else{
+            char name1[100];
+            int errorCode = getlasterror(fd,name1,100);
+            qDebug()<<"ERROR:"<<errorCode<<name1;
+            emit changeText("Thread ="
+                            + name
+                            + " FileID = "
+                            + QString::number(readFileID)
+                            + " ERROR:"
+                            + QString::number(errorCode)
+                            + name1);
+            testFile.close();
+            QFile::remove(testFile.fileName());
+        }
 }

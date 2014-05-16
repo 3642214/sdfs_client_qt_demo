@@ -63,7 +63,11 @@ private slots:
     void on_upLittleFileButton_clicked();
     void on_pushButton_clicked();
     void on_test_137_clicked();
- public slots:
+    void on_pushButton_2_clicked();
+
+    void on_pushButton_3_clicked();
+
+public slots:
 
 };
 

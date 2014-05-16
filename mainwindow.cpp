@@ -29,15 +29,17 @@ MainWindow::MainWindow(QWidget *parent) :
     ui->setupUi(this);
     ui->textEdit->ensureCursorVisible();
 //    sky_sdfs_init("config.ini");
-    clientconfig* cconfig = new clientconfig;
-    cconfig->cnport = 29009;
-    memcpy(cconfig->cn_ips,"192.168.8.209",13);
-    cconfig->cn_ips[13] = '\0';
-    cconfig->indexport = 29001;
-    cconfig->snport = 29000;
-    memcpy(cconfig->rack,"/root/rack22",12);
-    cconfig->rack[12] = '\0';
-    client_init(cconfig);
+    struct clientconfig cconfig = {
+        cconfig.cnport = 29009,
+        cconfig.indexport = 29001,
+        cconfig.snport = 29000,
+    };
+    memcpy(cconfig.cn_ips,"192.168.8.209",13);
+    cconfig.cn_ips[13] = '\0';
+    memcpy(cconfig.rack,"/root/rack22",12);
+    cconfig.rack[12] = '\0';
+    client_init(&cconfig);
+
     connect(ui->textEdit,SIGNAL(textChanged()),this,SLOT(textDown()));
     connect(ui->checkBox,SIGNAL(clicked()),this,SLOT(changeValue()));
 }
@@ -300,12 +302,17 @@ void MainWindow::on_upLocalFile_clicked()
 
 void MainWindow::on_test_87_1_clicked()
 {
-    fileinfo* finfo = new fileinfo;
-    memcpy(finfo->name,"testfilename",100);
-    finfo->blocklength = BLOCKLENGTH;
-    finfo->copysize = 1;
-    long long testfid = client_create(finfo);
+    struct fileinfo finfo = {
+        finfo.copysize=1,
+        finfo.filetype=NORMAL_FILE,
+        finfo.blocklength=BLOCKLENGTH,
+    };
+    memcpy(finfo.name,"test_87_1",100);
+
+    long long testfid = client_create(&finfo);
+
     int testfd = client_open(testfid + 123,O_READ);
+     qDebug()<<testfid<<testfd;
     if(testfd == -1 and testfid != -1){
         ui->textEdit->append(QString::number(lineCount) + " -----> use wrong fileid to open file           test    OK");
         lineCount++;
@@ -319,11 +326,14 @@ void MainWindow::on_test_87_1_clicked()
 
 void MainWindow::on_test_87_2_clicked()
 {
-    fileinfo* finfo = new fileinfo;
-    memcpy(finfo->name,QString::number(lineCount).toAscii().constData(),100);
-    finfo->blocklength = BLOCKLENGTH;
-    finfo->copysize = 1;
-    long long testfid = client_create(finfo);
+    struct fileinfo finfo = {
+        finfo.copysize=1,
+        finfo.filetype=NORMAL_FILE,
+        finfo.blocklength=BLOCKLENGTH,
+    };
+    memcpy(finfo.name,"test_87_2",100);
+
+    long long testfid = client_create(&finfo);
     int testfd = client_open(testfid,O_WRITE);
 //    char buff[BUFFSIZE];
     int buffSize = atoi(ui->lineEdit_buffSize->text().toAscii());
@@ -350,11 +360,14 @@ void MainWindow::on_test_87_2_clicked()
 
 void MainWindow::on_test_87_3_clicked()
 {
-    fileinfo* finfo = new fileinfo;
-    memcpy(finfo->name,"testfilename",100);
-    finfo->blocklength = BLOCKLENGTH;
-    finfo->copysize = 1;
-    long long testfid = client_create(finfo);
+    struct fileinfo finfo = {
+        finfo.copysize=1,
+        finfo.filetype=NORMAL_FILE,
+        finfo.blocklength=BLOCKLENGTH,
+    };
+    memcpy(finfo.name,"test_87_3",100);
+
+    long long testfid = client_create(&finfo);
     int testfd = client_open(testfid,O_READ);
 //    char buff[BUFFSIZE];
     int buffSize = atoi(ui->lineEdit_buffSize->text().toAscii());
@@ -380,11 +393,14 @@ void MainWindow::on_test_87_3_clicked()
 
 void MainWindow::on_test_90_1_clicked()
 {
-    fileinfo* finfo = new fileinfo;
-    memcpy(finfo->name,"testfilename",100);
-    finfo->blocklength = BLOCKLENGTH;
-    finfo->copysize = 1;
-    long long testfid = client_create(finfo);
+    struct fileinfo finfo = {
+        finfo.copysize=1,
+        finfo.filetype=NORMAL_FILE,
+        finfo.blocklength=BLOCKLENGTH,
+    };
+    memcpy(finfo.name,"test_90_1",100);
+
+    long long testfid = client_create(&finfo);
     int testfd = client_open(testfid,O_WRITE);
     client_close(testfd);
 //    char buff[BUFFSIZE];
@@ -411,11 +427,14 @@ void MainWindow::on_test_90_1_clicked()
 
 void MainWindow::on_test_90_2_clicked()
 {
-    fileinfo* finfo = new fileinfo;
-    memcpy(finfo->name,"testfilename",100);
-    finfo->blocklength = BLOCKLENGTH;
-    finfo->copysize = 1;
-    long long testfid = client_create(finfo);
+    struct fileinfo finfo = {
+        finfo.copysize=1,
+        finfo.filetype=NORMAL_FILE,
+        finfo.blocklength=BLOCKLENGTH,
+    };
+    memcpy(finfo.name,"test_90_2",100);
+
+    long long testfid = client_create(&finfo);
     int testfd = client_open(testfid,O_READ);
     client_close(testfd);
 //    char buff[BUFFSIZE];
@@ -623,3 +642,45 @@ void MainWindow::on_test_137_clicked()
 
 }
 
+
+void MainWindow::on_pushButton_2_clicked()
+{
+    QList<QString> fileList = QFileDialog::getOpenFileNames(
+                this,
+                QDir::currentPath());
+
+    if (!fileList.isEmpty()) {
+        changeTestinfo();
+        ui->selectFileCount->setText(QString::number(fileList.length()));
+        test->filePath = fileList;
+        test->count = ui->uploadCount->text().toInt();
+        test->testFunc = T_UPLOAD_FILE;
+        test->startTime = ui->dateTimeEdit->text();
+        createThread();
+        runThread();
+    }
+}
+
+void MainWindow::on_pushButton_3_clicked()
+{
+    if(ui->readSize_edit->text().toInt() != 0 || ui->checkBox->isChecked())
+    {
+        changeTestinfo();
+        test->fileID = ui->lineEdit_6->text().toLongLong();
+        if(test->fileID>>61 == 1){
+            test->testFunc = T_DOWNLOAD_LFILE;
+            test->count = ui->uploadCount->text().toInt();
+        }
+        else{
+            test->downloadSize = atoi(ui->readSize_edit->text().toAscii());
+            test->offset = atoi(ui->offset_Edit->text().toAscii());
+            test->testFunc = T_DOWNLOAD_NEW;
+        }
+        createThread();
+        runThread();
+    }
+    else
+    {
+        QMessageBox::question(NULL, "error", "read length can not be zero", QMessageBox::Yes , QMessageBox::Yes);
+    }
+}
