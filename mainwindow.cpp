@@ -29,17 +29,6 @@ MainWindow::MainWindow(QWidget *parent) :
     ui->setupUi(this);
     ui->textEdit->ensureCursorVisible();
 //    sky_sdfs_init("config.ini");
-    struct clientconfig cconfig = {
-        cconfig.cnport = 29009,
-        cconfig.indexport = 29001,
-        cconfig.snport = 29000,
-    };
-    memcpy(cconfig.cn_ips,"192.168.8.209",13);
-    cconfig.cn_ips[13] = '\0';
-    memcpy(cconfig.rack,"/root/rack22",12);
-    cconfig.rack[12] = '\0';
-    client_init(&cconfig);
-
     connect(ui->textEdit,SIGNAL(textChanged()),this,SLOT(textDown()));
     connect(ui->checkBox,SIGNAL(clicked()),this,SLOT(changeValue()));
 }
@@ -683,4 +672,18 @@ void MainWindow::on_pushButton_3_clicked()
     {
         QMessageBox::question(NULL, "error", "read length can not be zero", QMessageBox::Yes , QMessageBox::Yes);
     }
+}
+
+void MainWindow::on_initButton_clicked()
+{
+    struct clientconfig cconfig = {
+        cconfig.cnport = ui->cnportEdit->text().toInt(),
+        cconfig.indexport = ui->indexportEdit->text().toInt(),
+        cconfig.snport = ui->snportEdit->text().toInt(),
+    };
+    memcpy(cconfig.cn_ips,ui->cnipsEdit->text().toAscii().data(),ui->cnipsEdit->text().length());
+    cconfig.cn_ips[ui->cnipsEdit->text().length()] = '\0';
+    memcpy(cconfig.rack,ui->rackEdit->text().toAscii().data(),ui->rackEdit->text().length());
+    cconfig.rack[ui->rackEdit->text().length()] = '\0';
+    client_init(&cconfig);
 }

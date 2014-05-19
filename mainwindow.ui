@@ -10,7 +10,7 @@
     <x>0</x>
     <y>0</y>
     <width>633</width>
-    <height>470</height>
+    <height>498</height>
    </rect>
   </property>
   <property name="sizePolicy">
@@ -35,10 +35,112 @@
   <widget class="QWidget" name="centralWidget">
    <layout class="QVBoxLayout" name="verticalLayout_3">
     <item>
-     <layout class="QVBoxLayout" name="verticalLayout_2" stretch="0,0,0,0">
+     <layout class="QVBoxLayout" name="verticalLayout_2" stretch="0,0,0,0,0">
       <property name="sizeConstraint">
        <enum>QLayout::SetMaximumSize</enum>
       </property>
+      <item>
+       <layout class="QHBoxLayout" name="horizontalLayout_4" stretch="1,0,1,4,1,4,1,4,1,8,1">
+        <property name="sizeConstraint">
+         <enum>QLayout::SetDefaultConstraint</enum>
+        </property>
+        <item>
+         <widget class="QLabel" name="label_15">
+          <property name="text">
+           <string>cnIP</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QLineEdit" name="cnipsEdit">
+          <property name="minimumSize">
+           <size>
+            <width>50</width>
+            <height>0</height>
+           </size>
+          </property>
+          <property name="text">
+           <string>192.168.8.209</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QLabel" name="label_16">
+          <property name="text">
+           <string>cnPort</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QLineEdit" name="cnportEdit">
+          <property name="minimumSize">
+           <size>
+            <width>0</width>
+            <height>0</height>
+           </size>
+          </property>
+          <property name="text">
+           <string>29009</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QLabel" name="label_17">
+          <property name="text">
+           <string>indexPort</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QLineEdit" name="indexportEdit">
+          <property name="text">
+           <string>29001</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QLabel" name="label_18">
+          <property name="text">
+           <string>snPort</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QLineEdit" name="snportEdit">
+          <property name="text">
+           <string>29000</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QLabel" name="label_19">
+          <property name="text">
+           <string>rack</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QLineEdit" name="rackEdit">
+          <property name="text">
+           <string>/root/rack2</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QPushButton" name="initButton">
+          <property name="minimumSize">
+           <size>
+            <width>40</width>
+            <height>0</height>
+           </size>
+          </property>
+          <property name="text">
+           <string>init</string>
+          </property>
+         </widget>
+        </item>
+       </layout>
+      </item>
       <item>
        <layout class="QHBoxLayout" name="horizontalLayout_2" stretch="2,1">
         <item>
